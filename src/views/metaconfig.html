@@ -1,0 +1,145 @@
+{% extends 'layout.html' %}
+
+{% block title %}Metachain Configurator{% endblock %}
+
+{% block content %}
+
+<h2>METACHAIN CONFIGURATOR</h2>
+
+{% if added %}
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    Node added successfully
+</div>
+{% else %}
+
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    Metachain Configurator serves as the fundamental framework for enabling centralized management of your decentralized subchain.  Empowering you to consolidate crucial elements such as genesis settings, node configurations, governance token allocation, subchain registration, and validator stakes into a unified and streamlined configuration offers a comprehensive solution for orchestrating and optimizing the various components of your subchain ecosystem within a centralized framework.
+
+</div>
+
+{% endif %}
+
+<h3>CONFIGURATIONS &mdash; ACTIVE &nbsp;<a style="color:rgb(42, 184, 230);" href="/govtoken/add">+</a></h3>
+<div class="metastore-container"></div>
+
+<h3>CONFIGURATIONS &mdash; PROVISIONED &nbsp;<a style="color:rgb(42, 184, 230);" href="/metaconfig/add">+</a></h3>
+<div class="metastore-container-disabled"></div>
+
+<script>
+
+    // coming soon to a mainnet near you ;)
+    // <a href="/metaconfig"><i className="fa-solid fa-dice-d20"></i><span>MetaConfigurator</span></a>
+    fetchConfigurations(document.querySelector('.metastore-container'), 'enabled');
+    fetchConfigurations(document.querySelector('.metastore-container-disabled'), 'disabled');
+
+    async function fetchConfigurations(container, state) {
+        try {
+            const response = await fetch('/metaconfig/configurations/' + state);
+            const profiles = await response.json();
+
+            const profilesWithAddress = await Promise.all(profiles.map(async (profile) => {
+                const res1 = await fetch('/keystore/id/' + profile.admin_mainchain_keystore_id);
+                const keyData1 = await res1.json();
+                const res2 = await fetch('/keystore/id/' + profile.admin_subchain_keystore_id);
+                const keyData2 = await res2.json();
+
+                return {
+                    ...profile,
+                    admin_mainchain_keystore: keyData1.keystore.address,
+                    admin_subchain_keystore: keyData2.keystore.address
+                };
+            }));
+
+            container.innerHTML = profilesWithAddress.map(({config_id, config_name, description, mainchain, admin_mainchain_keystore, admin_mainchain_keystore_id, subchain_name, subchain_id, admin_subchain_keystore, admin_subchain_keystore_id, init_validator_set_json, init_stake_amount, govtoken_id, genesis_blockhash, tfuel_token_bank, tnt20_token_bank, tnt721_token_bank, tnt1155_token_bank, last_deploy, last_deploy_state, last_update}) => `
+<a href="/metaconfig/edit/${config_id}" style="">
+      <div class="metastore-childnode" >
+
+        <div style="position: relative;">
+          <div style="float: right; position: absolute;top: 0;right: 0;"><p style="text-align: right;color:#666"> ${config_id}</p><p style="color:#555555"> </p></div>
+          <p style="color:#fe5413">${config_name}</p>
+          <table>
+
+            <tr>
+                <td>DESCRIPTION</td>
+                <td>${description}</td>
+            </tr>
+
+            <tr>
+              <td>MAINCHAIN</td>
+              <td>${mainchain}</td>
+            </tr>
+
+            <tr>
+                <td>SUBCHAIN</td>
+                <td>${subchain_name} (id: ${subchain_id})</td>
+            </tr>
+
+            <tr>
+              <td>GOVTOKEN</td>
+              <td>${govtoken_id}</td>
+            </tr>
+
+            <tr>
+                 <td>DEPLOYED</td>
+            <td>
+                ${last_deploy_state === 0 ? 'Not deployed' :
+                    last_deploy_state === 1 ? 'Generating Genesis Block' :
+                        last_deploy_state === 2 ? 'Building Subchain' :
+                            last_deploy_state === 3 ? 'Complete' : 'Unknown status'}
+            </td>
+            </tr>
+
+            <tr>
+              <td>GENESIS BLOCKHASH</td>
+              <td>${String(genesis_blockhash).length < 60 ? 'Pending deployment' : genesis_blockhash}</td>
+            </tr>
+
+          <tr>
+  <td>TFUEL<br/>TOKEN BANK</td>
+  <td>${String(tfuel_token_bank).length < 40 ? 'Pending deployment' : tfuel_token_bank}</td>
+</tr>
+
+<tr>
+  <td>TNT20<br/>TOKEN BANK</td>
+  <td>${String(tnt20_token_bank).length < 40 ? 'Pending deployment' : tnt20_token_bank}</td>
+</tr>
+
+<tr>
+  <td>TNT721<br/>TOKEN BANK</td>
+  <td>${String(tnt721_token_bank).length < 40 ? 'Pending deployment' : tnt721_token_bank}</td>
+</tr>
+
+<tr>
+  <td>TNT1155<br/>TOKEN BANK</td>
+  <td>${String(tnt1155_token_bank).length < 40 ? 'Pending deployment' : tnt1155_token_bank}</td>
+</tr>
+            <tr>
+              <td>ADMIN WALLET<br/>MAINCHAIN</td>
+              <td>${admin_mainchain_keystore} (id: ${admin_mainchain_keystore_id})</td>
+            </tr>
+
+            <tr>
+              <td>ADMIN WALLET<br/>SUBCHAIN</td>
+              <td>${admin_subchain_keystore} (id: ${admin_subchain_keystore_id})</td>
+            </tr>
+
+            <tr>
+                <td>LAST UPDATED</td>
+                <td>${last_update} UTC</td>
+            </tr>
+
+          </table>
+          <div style="float: right; position: absolute;bottom: 0;right: 0;text-align: right;color:#555"><i class="fa-solid fa-coins"></i></div>
+        </div>
+
+      </div>
+      </a>
+
+      <br/>
+        `).join('');
+            } catch (error) {
+            console.error(error);
+        }
+    }
+</script>
+{% endblock %}

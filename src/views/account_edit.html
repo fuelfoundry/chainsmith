@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+
+{% block title %}ChainSmith - Account - Edit Settings{% endblock %}
+
+{% block content %}
+
+<h2>ACCOUNT</h2>
+
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    Activating password encryption will safeguard all passwords within the database, including those tied to keystores. The password you set will serve dual purposes - as your ChainSmith login credential and a key component in the encryption process. Consequently, if you forget your password, keystore and node password recovery will be impossible. Importantly, this encryption activation is a one-way process, it's irreversible and cannot be deactivated once it's turned on. Therefore, prior to activating encryption, we strongly recommend you create a backup of your database to ensure its security.
+</div>
+
+<h3>EDIT SETTINGS</h3>
+    <form action="/account/edit/{{ id }}" method="post" style="position: relative;width:100%;vertical-align: top;" class="fuelform">
+        <div>
+        <table style="vertical-align: text-top;">
+            <tr>
+                <td>USERNAME</td>
+                <td>{{ username }}</td>
+            </tr>
+            <tr>
+                <td>EMAIL</td>
+                <td><input type="text" name="email" id="email" placeholder="{{ email }}" maxlength="64" value="{{ email }}"></td>
+            </tr>
+            <tr>
+                <td>PASSWORD</td>
+                <td><input type="password" name="password" maxlength="64" placeholder="leave blank to skip updating password"></td>
+            </tr>
+            <tr>
+                <td>PASSWORD (CONFIRM)</td>
+                <td><input type="password" name="password_confirm" maxlength="64" placeholder="leave blank to skip updating password"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="checkbox" id="password_encrypted" name="password_encrypted" {{ password_encryptedStr }}> Enable dB Password Encryption (must specify new password)</td>
+            </tr>
+        </table>
+        </div>
+        <div style="float: right; position: absolute;bottom: -50px;"><button type="cancel">Cancel</button> <button type="submit">Save</button></div>
+    </form>
+<script>
+
+    const passwordEncryptionSelect = document.getElementById('password_encrypted');
+
+    if (passwordEncryptionSelect.checked === true) {
+
+        passwordEncryptionSelect.disabled = true;
+    }
+
+    const cancelButton = document.querySelector('button[type=cancel]');
+
+    cancelButton.addEventListener('click', () => {
+
+        window.history.back();
+    });
+
+</script>
+{% endblock %}

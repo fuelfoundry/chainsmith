@@ -1,0 +1,91 @@
+{% extends 'layout.html' %}
+
+{% block title %}ChainSmith - GenesisForge - Upload Genesis Snapshot{% endblock %}
+
+{% block content %}
+
+<h2>GENESISFORGE</h2>
+
+
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    This utility is for uploading Genesis snapshots only (no larger than 100K in size).  Any attempt to upload a file larger than a genesis snapshot may result in failure.
+</div>
+<h3>UPLOAD GENESIS SNAPSHOT</h3>
+    <form action="/genesisforge/edit/{{ id }}/upload" method="post" style="position: relative;width:100%;vertical-align: top;" class="fuelform">
+        <div>
+        <table style="vertical-align: text-top;">
+            <tr>
+                <td>SUBCHAIN ID</td>
+                <td style="padding-left: 12px"> {{ subchain_id }}</td>
+            </tr>
+            <tr>
+                <td>NAME</td>
+                <td style="padding-left: 12px">{{ genesis_name }}</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td style="text-align: left"><input type="text" name="snapshot_data" id="snapshot_data" style="display: none;" placeholder="{...}" hidden></td>
+            </tr>
+            <tr>
+            <td style="padding-top:12px;">GENESIS SNAPSHOT</td>
+                <td style="text-align:left;padding-top:12px;">
+
+                    <input type="file" id="fileInput">
+                    <br>
+                </td>
+                <td style="text-align: left;"></td>
+            </tr>
+
+        </table>
+        </div>
+        <div style="float: right; position: absolute;bottom: -50px;"><button type="cancel">Cancel</button> <button type="submit">Upload</button></div>
+    </form>
+<script>
+
+    const form = document.querySelector('form');
+    const snapshotInput = document.getElementById('snapshot_data');
+    const fileInput = document.getElementById('fileInput');
+    const submitButton = document.querySelector('button[type=submit]');
+    const cancelButton = document.querySelector('button[type=cancel]');
+
+    snapshotInput.visible = false;
+
+    submitButton.style.backgroundColor = 'darkgray';
+    submitButton.disabled = true;
+
+    cancelButton.addEventListener('click', () => {
+
+        window.history.back();
+    });
+
+    snapshotInput.addEventListener('click', () => {
+
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = () => {
+
+            // Removing data URL prefix (data:application/octet-stream;base64,) to snip Base64 string
+            const base64String = reader.result.split(',')[1];
+            snapshotInput.value = base64String;
+            submitButton.style.backgroundColor = '';
+            submitButton.disabled = false;
+        };
+
+        //reader.readAsArrayBuffer(file);
+        reader.readAsDataURL(file);
+    });
+
+    form.addEventListener('submit', (event) => {
+        if (!snapshotInput.value) {
+            event.preventDefault();
+            alert('Please select a file to upload.');
+        }
+    });
+
+</script>
+{% endblock %}

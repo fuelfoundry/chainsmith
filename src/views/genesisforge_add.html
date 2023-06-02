@@ -1,0 +1,249 @@
+{% extends 'layout.html' %}
+
+{% block title %}ChainSmith - GenesisForge - Add Genesis{% endblock %}
+
+{% block content %}
+
+<h2>GENESISFORGE</h2>
+
+<h3>ADD GENESIS</h3>
+
+    <form action="/genesisforge/add" method="post" style="position: relative;width:100%;vertical-align: top;" class="fuelform">
+        <div>
+        <table style="vertical-align: text-top;">
+            <tr>
+                <td>NAME</td>
+                <td><input type="text" name="genesis_name" placeholder="Subchain 360777 Genesis on Theta Privatenet" required></td>
+            </tr>
+
+            <tr>
+                <td>NETWORK &nbsp; &nbsp;</td>
+                <td><select id="mainchain" name="mainchain">
+                    <option value="0">Select Network...</option>
+                    <option value="mainnet">Theta Mainnet (keystores: {{ keystoreTotalCountMainnet }}) </option>
+                    <option value="testnet">Theta Testnet (keystores: {{ keystoreTotalCountTestnet }}) </option>
+                    <option value="privatenet">Theta Privatenet (keystores: {{ keystoreTotalCountPrivatenet }}) </option>
+                </select></td>
+            </tr>
+
+            <tr>
+                <td>SUBCHAIN ID</td>
+                <td><input type="text" name="subchain_id" placeholder="12345" required></td>
+            </tr>
+
+            <tr>
+                <td>INITIAL VALIDATORS &nbsp;</td>
+                <td><select id="validator_count" name="validator_count">
+                    <option value="0">Select Initial Count...</option>
+                    <option value="1">1</option>
+                </select></td>
+            </tr>
+
+            <tr id="admin_mainchain_row">
+                <td>ADMIN KEYSTORE&nbsp;</td>
+                <td>
+                    <select id="admin_mainchain_keystore_id" name="admin_mainchain_keystore_id">
+                        <option value="0">Select Admin Keystore...</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr id="fallback_receiver_row">
+                <td>FALLBACK RECEIVER &nbsp;<br/>KEYSTORE&nbsp;</td>
+                <td>
+                    <select id="fallback_receiver_keystore_id" name="fallback_receiver_keystore_id">
+                        <option value="0">Select Fallback Receiver Keystore...</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr id="vn1_validator_row1">
+                <td>VALIDATOR #1<br/>KEYSTORE&nbsp;</td>
+                <td>
+                    <select id="initial_validator1_keystore_id" name="initial_validator1_keystore_id">
+                        <option value="0">Select Validator #1 Keystore...</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr id="vn1_validator_row2">
+                <td>VALIDATOR #1<br/>GOVTOKEN STAKE&nbsp;</td>
+
+                <td><input type="text" name="initial_validator1_govtoken_stake" placeholder="Note: Specify whole numbers i.e 10000 (10000^18 wei)" required></td>
+            </tr>
+            <tr>
+                <td>AUTO-GENESIS &nbsp;</td>
+                <td><select id="auto_genesis" name="auto_genesis">
+                    <option value="-1">Select Genesis Creation...</option>
+                    <option value="1">Use FuelFoundry Servers for Genesis Generation</option>
+                    <option value="0">Provide Manual Genesis</option>
+                </select></td>
+            </tr>
+            <tr id="chain_registrar_row">
+                <td>CHAIN REGISTRAR</td>
+                <td><input type="text" name="chain_registrar" placeholder="0x1234567890ABCDEF...."></td>
+            </tr>
+            <tr id="tfuel_token_bank_row">
+                <td>TFUEL TOKEN BANK</td>
+                <td><input type="text" name="tfuel_token_bank" placeholder="0x1234567890ABCDEF...."></td>
+            </tr>
+            <tr id="tnt20_token_bank_row">
+                <td>TNT20 TOKEN BANK</td>
+                <td><input type="text" name="tnt20_token_bank" placeholder="0x1234567890ABCDEF...."></td>
+            </tr>
+            <tr id="tnt721_token_bank_row">
+                <td>TNT721 TOKEN BANK</td>
+                <td><input type="text" name="tnt721_token_bank" placeholder="0x1234567890ABCDEF...."></td>
+            </tr>
+            <tr id="tnt1155_token_bank_row">
+                <td>TNT1155 TOKEN BANK</td>
+                <td><input type="text" name="tnt1155_token_bank" placeholder="0x1234567890ABCDEF...."></td>
+            </tr>
+            <tr id="balance_checker_row">
+                <td>BALANCE CHECKER</td>
+                <td><input type="text" name="balance_checker" placeholder="0x1234567890ABCDEF...."></td>
+            </tr>
+            <tr id="genesis_blockhash_row">
+                <td>GENESIS BLOCKHASH</td>
+                <td><input type="text" name="genesis_blockhash" placeholder="0x1234567890ABCDEF...."></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="checkbox" name="enable" checked> Activate (Enable)
+
+                    <br/>
+                </td>
+            </tr>
+        </table>
+
+        </div>
+        <div style="float: right; position: absolute;bottom: -50px;"><button type="cancel">Cancel</button> <button type="submit">Save</button></div>
+    </form>
+
+<script>
+
+    const fileInput = document.getElementById('fileInput');
+    const form = document.querySelector('form');
+    const cancelButton = document.querySelector('button[type=cancel]');
+    const admin_mainchain_row = document.getElementById('admin_mainchain_row');
+    const fallback_receiver_row = document.getElementById('fallback_receiver_row');
+    const vn1_validator_row1 = document.getElementById('vn1_validator_row1');
+    const vn1_validator_row2 = document.getElementById('vn1_validator_row2');
+    const validatorCountSelect = document.getElementById('validator_count');
+    const autoGenesisSelect = document.getElementById('auto_genesis');
+    const tfuel_token_bank_row = document.getElementById('tfuel_token_bank_row');
+    const tnt20_token_bank_row = document.getElementById('tnt20_token_bank_row');
+    const tnt721_token_bank_row = document.getElementById('tnt721_token_bank_row');
+    const tnt1155_token_bank_row = document.getElementById('tnt1155_token_bank_row');
+    const genesis_blockhash_row = document.getElementById('genesis_blockhash_row');
+    const chain_registrar_row = document.getElementById('chain_registrar_row');
+    const balance_checker_row  = document.getElementById('balance_checker_row');
+    //const upload_genesis_row  = document.getElementById('upload_genesis_row');
+
+    admin_mainchain_row.style.display = 'none';
+    fallback_receiver_row.style.display = 'none';
+    vn1_validator_row1.style.display = 'none';
+    vn1_validator_row2.style.display = 'none';
+    tfuel_token_bank_row.style.display = 'none';
+    tnt20_token_bank_row.style.display = 'none';
+    tnt721_token_bank_row.style.display = 'none';
+    tnt1155_token_bank_row.style.display = 'none';
+    chain_registrar_row.style.display = 'none';
+    balance_checker_row.style.display = 'none';
+    genesis_blockhash_row.style.display = 'none';
+    //upload_genesis_row.style.display = 'none';
+
+    cancelButton.addEventListener('click', () => {
+
+        window.history.back();
+    });
+
+    validatorCountSelect.addEventListener('change', function() {
+
+        if (this.value > 0) {
+
+            // show
+            admin_mainchain_row.style.display = '';
+            fallback_receiver_row.style.display = '';
+            vn1_validator_row1.style.display = '';
+            vn1_validator_row2.style.display = '';
+        } else {
+
+            // hide
+            admin_mainchain_row.style.display = 'none';
+            fallback_receiver_row.style.display = 'none';
+            vn1_validator_row1.style.display = 'none';
+            vn1_validator_row2.style.display = 'none';
+
+        }
+    });
+
+
+    autoGenesisSelect.addEventListener('change', function() {
+        if (this.value === "-1" || this.value === "1") {
+            // hide
+            tfuel_token_bank_row.style.display = 'none';
+            tnt20_token_bank_row.style.display = 'none';
+            tnt721_token_bank_row.style.display = 'none';
+            tnt1155_token_bank_row.style.display = 'none';
+            chain_registrar_row.style.display = 'none';
+            balance_checker_row.style.display = 'none';
+            genesis_blockhash_row.style.display = 'none';
+            //upload_genesis_row.style.display = 'none';
+        } else {
+            // show
+            tfuel_token_bank_row.style.display = '';
+            tnt20_token_bank_row.style.display = '';
+            tnt721_token_bank_row.style.display = '';
+            tnt1155_token_bank_row.style.display = '';
+            chain_registrar_row.style.display = '';
+            balance_checker_row.style.display = '';
+            genesis_blockhash_row.style.display = '';
+            //upload_genesis_row.style.display = '';
+        }
+    });
+
+    document.getElementById('mainchain').addEventListener('change', function() {
+        const mainchainValue = this.value;
+
+        fetch('http://localhost:3000/keystore/keystores/enabled')
+            .then(response => response.json())
+            .then(data => {
+               // let select = document.getElementById('validator_keystore_id');
+                let select = document.getElementById('initial_validator1_keystore_id');
+                let admin_mainchain_keystore_id_select = document.getElementById('admin_mainchain_keystore_id');
+                let fallback_receiver_keystore_id_select = document.getElementById('fallback_receiver_keystore_id');
+
+                select.innerHTML = '<option value="0">Select Keystore...</option>'; // reset the dropdown
+                admin_mainchain_keystore_id_select.innerHTML = '<option value="0">Select Keystore...</option>'; // reset the dropdown
+                fallback_receiver_keystore_id_select.innerHTML = '<option value="0">Select Keystore...</option>'; // reset the dropdown
+                //select.innerHTML = '<option value="0">Select Mainchain Walletnode Keystore...</option>'; // reset the dropdown
+
+
+                for(let item of data) {
+                    let keystore = JSON.parse(item.keystore); // parsing the keystore
+                    let tags = JSON.parse(item.tags); // parsing the tags
+                    if(tags[mainchainValue] === 1) { // checking if the selected mainchain is 1 in tags
+                        let option1 = document.createElement('option');
+                        option1.value = item.id;
+                        option1.text = item.name + ' (0x' + keystore.address.substring(0, 3) + '...' + keystore.address.slice(-4) + ')';
+                        select.appendChild(option1);
+
+                        let option2 = document.createElement('option');
+                        option2.value = item.id;
+                        option2.text = item.name + ' (0x' + keystore.address.substring(0, 3) + '...' + keystore.address.slice(-4) + ')';
+                        admin_mainchain_keystore_id_select.appendChild(option2);
+
+                        let option3 = document.createElement('option');
+                        option3.value = item.id;
+                        option3.text = item.name + ' (0x' + keystore.address.substring(0, 3) + '...' + keystore.address.slice(-4) + ')';
+                        fallback_receiver_keystore_id_select.appendChild(option3);
+
+                    }
+                }
+            })
+            .catch(error => console.error(error));
+    });
+
+</script>
+{% endblock %}

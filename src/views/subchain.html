@@ -1,0 +1,170 @@
+{% extends 'layout.html' %}
+
+{% block title %}ChainSmith - ChainForge{% endblock %}
+
+{% block content %}
+
+<h2>CHAINFORGE</h2>
+
+{% if added %}
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    Subchain added to registry successfully. &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+
+</div>
+{% else %}
+
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    Theta Metachain subchains serves as the foundation for your overall framework, representing the core structure around which your operations revolve.  By associating your genesis with the mainchain, you have the ability to bring your subchain into existence.
+</div>
+
+{% endif %}
+
+<h3>SUBCHAINS &mdash; ACTIVE &nbsp;<a style="color:rgb(42, 184, 230);" href="/subchain/add">+</a></h3>
+<div class="metastore-container"></div>
+
+<h3>SUBCHAINS &mdash; PROVISIONED &nbsp;<a style="color:rgb(42, 184, 230);" href="/subchain/add">+</a></h3>
+<div class="metastore-container-disabled"></div>
+
+<script>
+    fetchConfigurations(document.querySelector('.metastore-container'), 'enabled');
+    fetchConfigurations(document.querySelector('.metastore-container-disabled'), 'disabled');
+
+    //subchain_generate_genesis -mainchainID=privatenet -subchainID=tsub360777 -initValidatorSet=./data/init_validator_set.json -admin=0x2E833968E5bB786Ae419c4d13189fB081Cc43bab -fallbackReceiver=0x2E833968E5bB786Ae419c4d13189fB081Cc43bab -genesis=./snapshot
+    async function fetchConfigurations(container, state) {
+        try {
+            const response = await fetch('/subchain/subchains/' + state);
+            const profiles = await response.json();
+
+            const profilesWithAddress = await Promise.all(profiles.map(async (profile) => {
+                const res1 = await fetch('/keystore/id/' + profile.admin_keystore_id);
+                //await console.log(res1);
+                const keyData1 = await res1.json();
+                const res2 = await fetch('/genesisforge/id/' + profile.genesis_id);
+                const keyData2 = await res2.json();
+                const res3 = await fetch('/govtoken/id/' + profile.govtoken_id);
+                const keyData3 = await res3.json();
+
+                return {
+                    ...profile,
+                    admin_mainchain_keystore: keyData1.keystore.address,
+                    genesis_name: keyData2.name,
+                    genesis_blockhash: keyData2.genesis_blockhash,
+                    subchain_id: keyData2.subchain_id,
+                    govtoken_name: keyData3.name,
+                    govtoken_address: keyData3.address
+                  //  govtoken_id: keyData3.govtoken_id
+                };
+            }));
+
+            //mainchain from subchain
+
+            container.innerHTML = profilesWithAddress.map(({id, subchain_name, mainchain, subchain_id, genesis_blockhash,genesis_id, govtoken_id, govtoken_name, govtoken_address, admin_mainchain_keystore, admin_keystore_id, tx_hash, dynasty, last_state, last_update}) => `
+            <div class="metastore-childnode">
+              <div class="metadiv-relative">
+                <div class="meta-ident">
+                <p id="state${id}">
+          ${last_state === -1 ? 'NOT DEPLOYED' : ''}
+          ${last_state === 0 ? 'ERROR' : ''}
+          ${last_state > 0 && last_state < 5 ? 'INSTALLING' : ''}
+          ${last_state >= 5 && last_state < 9 ? 'ERROR' : ''}
+          ${last_state === 10 ? 'DEPLOYED SUCCESSFULLY TO MAINCHAIN' : ''}
+
+            </p><p>${id}</p></div>
+                <p>${subchain_name}</p>
+          <table>
+            <tr>
+                <td>NETWORK</td>
+                <td>${mainchain}</td>
+            </tr>
+            <tr>
+                <td>SUBCHAIN ID</td>
+                <td>${subchain_id}</td>
+            </tr>
+            <tr>
+                <td>GOVERNMENT TOKEN</td>
+                <td><a class="meta-link" target="_blank" href="https://testnet-explorer.thetatoken.org/account/0x${govtoken_address}">${govtoken_address}</a> (id: ${govtoken_id}) [${govtoken_name}]</td>
+            </tr>
+
+            <tr>
+                <td>ADMIN WALLET</td>
+                <td><a class="meta-link" target="_blank" href="https://testnet-explorer.thetatoken.org/account/0x${admin_mainchain_keystore}">0x${admin_mainchain_keystore}</a> (id: ${admin_keystore_id})</td>
+            </tr>
+            <tr>
+                <td>GENESIS BLOCKHASH</td>
+                <td>${genesis_blockhash} (id: ${genesis_id})</td>
+            </tr>
+            <tr>
+              <td>TRANSACTION HASH</td>
+              <td>
+                <a class="meta-link" target="_blank" href="https://testnet-explorer.thetatoken.org/txs/${tx_hash}" >${tx_hash}</a> ${dynasty.length > 0 ? ' (dynasty: ' + dynasty + ')' : ''}
+            </td>
+            </tr>
+            <tr>
+              <td>COLLATERAL</td>
+              <td>10K wTHETA</td>
+            </tr>
+            <tr>
+                <td>LAST UPDATED</td>
+                <td>${last_update} UTC</td>
+            </tr>
+          </table>
+          <div class="metabuttons-container">
+
+             ${last_state < 9 ? `<a title="Deploy Subchain to Mainchain"><button id="deploy${id}" onclick="deploySubchain(`+id+`)"><i style="color:#2ee4be" class="fa-solid fa-rocket"></i></button></a>` : ''}
+
+          <a href="/subchain/edit/${id}" title="Edit Subchain"><button><i class="fa-solid fa-edit"></i></button></a>
+
+          </div><i class="fa-solid fa-chain"></i> &nbsp; ${last_state == -2 ? '<div class="state-error">ERROR</div>' : ''}
+
+              </div>
+            </div>
+
+      <br/>
+        `).join('');
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    // <a href="/subchain/status/${id}" title="Refresh Subchain Deployment Status"><button><i className="fa-solid fa-arrows-rotate"></i></button></a>
+
+    function disableButton(id) {
+        const button = document.getElementById(`deploy${id}`);
+        if (button) {
+            button.disabled = true;
+            button.style.backgroundColor = "#333333";
+        }
+    }
+
+    async function deploySubchain(id) {
+
+        disableButton(id);
+
+        console.log('deploySubchain called');
+        showToast('Forging Subchain...', '#2caed7');
+
+        fetch(`/subchain/deploy/${id}`);
+
+        let lastState = -1;
+        while (lastState < 10) {
+            console.log('Subchain status cycler called')
+            await new Promise(r => setTimeout(r, 4200));
+
+            const response = await fetch(`/subchain/status/${id}`);
+            //console.log('response:',response);
+
+            const { last_update, last_state, status } = await response.json();
+
+            if (last_state !== lastState) {
+                lastState = last_state;
+                console.log(last_update, 'lastState:',lastState);
+                showToast(status, '#2caed7');
+            }
+        }
+
+        console.log('Subchain deployment complete:');
+        showToast('Subchain deployment complete.  Please standby, refreshing in one block...', '#2caed7');
+        await new Promise(r => setTimeout(r, 7000));
+        location.reload();
+    }
+</script>
+{% endblock %}

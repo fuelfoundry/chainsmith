@@ -1,0 +1,146 @@
+{% extends 'layout.html' %}
+
+{% block title %}ChainSmith - GenesisForge{% endblock %}
+
+{% block content %}
+
+<h2>GENESISFORGE</h2>
+
+{% if added %}
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    Genesis added successfully. &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+
+</div>
+{% else %}
+
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    The genesis, colloquially known as block zero, holds a significant role in every blockchain as it marks the beginning of the chain. Unlike subsequent blocks that reference the previous block through its hash, the genesis stands alone and does not reference any prior block. The genesis block's unique nature signifies the starting point from which all subsequent blocks and transactions derive, the foundation of your subchain.
+</div>
+
+{% endif %}
+
+<h3>GENESIS &mdash; ACTIVE &nbsp;<a style="color:rgb(42, 184, 230);" href="/genesisforge/add">+</a></h3>
+<div class="metastore-container"></div>
+
+<h3>GENESIS &mdash; PROVISIONED &nbsp;<a style="color:rgb(42, 184, 230);" href="/genesisforge/add">+</a></h3>
+<div class="metastore-container-disabled"></div>
+
+<script>
+    fetchConfigurations(document.querySelector('.metastore-container'), 'enabled');
+    fetchConfigurations(document.querySelector('.metastore-container-disabled'), 'disabled');
+
+    //subchain_generate_genesis -mainchainID=privatenet -subchainID=tsub360777 -initValidatorSet=./data/init_validator_set.json -admin=0x2E833968E5bB786Ae419c4d13189fB081Cc43bab -fallbackReceiver=0x2E833968E5bB786Ae419c4d13189fB081Cc43bab -genesis=./snapshot
+    async function fetchConfigurations(container, state) {
+        try {
+            const response = await fetch('/genesisforge/genesis/' + state);
+            const profiles = await response.json();
+
+            const profilesWithAddress = await Promise.all(profiles.map(async (profile) => {
+                const res1 = await fetch('/keystore/id/' + profile.admin_mainchain_keystore_id);
+                const keyData1 = await res1.json();
+                const res2 = await fetch('/keystore/id/' + profile.fallback_receiver_keystore_id);
+                const keyData2 = await res2.json();
+                const res3 = await fetch('/keystore/id/' + profile.initial_validator1_keystore_id);
+                const keyData3 = await res3.json();
+
+                return {
+                    ...profile,
+                    admin_mainchain_keystore: keyData1.keystore.address,
+                    fallback_receiver_keystore: keyData2.keystore.address,
+                    initial_validator1_keystore: keyData3.keystore.address
+                };
+            }));
+
+            container.innerHTML = profilesWithAddress.map(({id, name, mainchain, initial_validator1_keystore, initial_validator1_keystore_id, initial_validator1_govtoken_stake, subchain_id, chain_registrar, fallback_receiver_keystore, cross_chain_fee_setter, admin_mainchain_keystore, admin_mainchain_keystore_id, fallback_receiver_keystore_id, init_validator_set_json, genesis_blockhash, tfuel_token_bank, tnt20_token_bank, tnt721_token_bank, tnt1155_token_bank, last_state, last_update}) => `
+<div class="metastore-childnode">
+              <div class="metadiv-relative">
+                <div class="meta-ident">
+                <p>
+          ${last_state === -1 ? 'NOT DEPLOYED' : ''}
+          ${last_state === 0 ? 'OFFLINE' : ''}
+          ${last_state > 0 && last_state < 5 ? 'ERROR' : ''}
+          ${last_state >= 5 && last_state < 9 ? 'DOWNLOAD FAILED' : ''}
+          ${last_state === 9 ? 'MISSING GENESIS SNAPSHOT' : ''}
+          ${last_state === 10 ? 'CONFIGURATION COMPLETE' : ''}
+
+            </p><p>${id}</p></div>
+                <p style="color:#fe5413">${name}</p>
+                <table>
+                <tr>
+                <td>NETWORK</td>
+                <td>${mainchain}</td>
+            </tr>
+            <tr>
+                <td>SUBCHAIN ID</td>
+                <td>${subchain_id}</td>
+            </tr>
+
+            <tr>
+                <td>CHAIN REGISTRAR</td>
+                <td>${chain_registrar}</td>
+            </tr>
+
+            <tr>
+                <td>TFUEL TOKEN BANK</td>
+                <td>${String(tfuel_token_bank).length < 40 ? 'Pending deployment' : `${tfuel_token_bank}`}</td>
+            </tr>
+            <tr>
+                <td>TNT20 TOKEN BANK</td>
+                <td>${String(tnt20_token_bank).length < 40 ? 'Pending deployment' : tnt20_token_bank}</td>
+            </tr>
+            <tr>
+                <td>TNT721 TOKEN BANK</td>
+                <td>${String(tnt721_token_bank).length < 40 ? 'Pending deployment' : tnt721_token_bank}</td>
+            </tr>
+            <tr>
+                <td>TNT1155 TOKEN BANK</td>
+                <td>${String(tnt1155_token_bank).length < 40 ? 'Pending deployment' : tnt1155_token_bank}</td>
+            </tr>
+            <tr>
+                <td>MAINCHAIN ADMIN </td>
+                <td><a class="meta-link" href="https://testnet-explorer.thetatoken.org/account/${admin_mainchain_keystore}">${admin_mainchain_keystore}</a> (id: ${admin_mainchain_keystore_id})</td>
+            </tr>
+            <tr>
+                <td>FALLBACK RECEIVER&nbsp;</td>
+                <td><a class="meta-link" href="https://testnet-explorer.thetatoken.org/account/${fallback_receiver_keystore}">${fallback_receiver_keystore}</a> (id: ${fallback_receiver_keystore_id})</td>
+            </tr>
+
+            <tr>
+                <td>CROSS CHAIN FEE SETTER</td>
+                <td><a class="meta-link" href="https://testnet-explorer.thetatoken.org/account/${cross_chain_fee_setter}">${cross_chain_fee_setter}</a> (id: ${admin_mainchain_keystore_id})</td>
+            </tr>
+
+            <tr>
+                <td>VALIDATOR #1</td>
+                <td><a class="meta-link" href="https://testnet-explorer.thetatoken.org/account/${initial_validator1_keystore}">${initial_validator1_keystore}</a> (id: ${initial_validator1_keystore_id})</td>
+            </tr>
+
+            <tr>
+                <td>&nbsp; &nbsp; GOVTOKEN STAKE</td>
+                <td>${initial_validator1_govtoken_stake.slice(0, -18)} (wei: ${initial_validator1_govtoken_stake})</td>
+            </tr>
+
+            <tr>
+                <td>GENESIS BLOCKHASH</td>
+                <td>${String(genesis_blockhash).length < 60 ? 'Pending deployment' : genesis_blockhash}</td>
+            </tr>
+            <tr>
+                <td>LAST UPDATED</td>
+                <td>${last_update} UTC</td>
+            </tr>
+                </table>
+                <div class="metabuttons-container">
+             ${last_state == -2 ? `<a href="/genesisforge/deploy/${id}" title="Deploy|Install Node"><button><i class="fa-solid fa-rocket"></i></button></a><a href="/genesisforge/reset/${id}" title="Reset|Redeploy Genesis - Warning! This will wipe and rebuild the existing genesis on your Validator nodes which may result in loss of data."> <button><i class="fa-brands fa-instalod"></i></button> </a>` : ``}
+             ${last_state > 8 ? `<a href="/genesisforge/download/snapshot/${id}" title="Download Genesis Snapshot"><button><i class="fa-solid fa-download"></i></button></a><a href="/genesisforge/download/config/${id}" title="Download Config YAML"><button><i class="fa-solid fa-file-arrow-down"></i></button></a>` : ``}
+             <a href="/genesisforge/edit/${id}" title="Edit Genesis"> <button><i class="fas fa-edit"></i></button></a>
+          </div><i class="fa-solid fa-dna"></i>
+              </div>
+            </div>
+          <br/>
+        `).join('');
+        } catch (error) {
+            console.error(error);
+        }
+    }
+</script>
+{% endblock %}

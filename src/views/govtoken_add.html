@@ -1,0 +1,202 @@
+{% extends 'layout.html' %}
+
+{% block title %}ChainSmith - TokenForge - Add Governance Token{% endblock %}
+
+{% block content %}
+
+<h2>TOKENFORGE</h2>
+<h3>ADD GOVERNANCE TOKEN</h3>
+    <form action="/govtoken/add" method="post" style="position: relative;width:100%;vertical-align: top;" class="fuelform">
+        <div>
+        <table style="vertical-align: text-top;">
+            <tr>
+                <td>NAME</td>
+                <td><input type="text" name="govtoken_name" placeholder="i.e.: {{ forgeTokenNameHint }} (note: is visible on blockchain)" required></td>
+            </tr>
+            <tr>
+                <td>SYMBOL</td>
+                <td><input type="text" name="govtoken_symbol" placeholder="i.e.: {{ forgeTokenNameSymbol }} (note: is visible on blockchain)" required></td>
+            </tr>
+            <tr>
+                <td>MINT TOKEN &nbsp; &nbsp;</td>
+                <td><select id="mint_token" name="mint_token">
+                    <option value="2" selected>Yes (Use ThetaLabs Provided Token JSON)</option>
+                    <option value="1">Yes (Upload Subchain Gov Token JSON...)</option>
+                    <option value="0">No (Token contract address will be supplied) </option>
+                </select></td>
+            </tr>
+            <div id="row_subchain_governance_token_json">
+            <tr id="contract_json">
+                <td>CONTRACT JSON</td>
+                <td style="text-align: left"><input type="text" name="subchain_governance_token_json" id="subchain_governance_token_json" placeholder="{...}" ></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td id="contract_json_file_select" style="text-align:left;">
+                    <input type="file" id="fileInput">
+                    <br>
+                </td>
+                <td style="text-align: left;"></td>
+            </tr>
+            </div>
+            <tr id="row_contract_address">
+                <td>TNT-20 GOV-TOKEN<br/>CONTRACT ADDRESS &nbsp;</td>
+                <td><input type="text" name="govtoken_address" placeholder="0x1234567890123456789012345678901234567890" minlength="0" maxlength="42" ></td>
+            </tr>
+            <tr>
+                <td>NETWORK &nbsp; &nbsp;</td>
+                <td><select id="mainchain" name="mainchain">
+                    <option value="0">Select Network...</option>
+                    <option value="mainnet">Theta Mainnet (keystores: {{ keystoreTotalCountMainnet }}) </option>
+                    <option value="testnet">Theta Testnet (keystores: {{ keystoreTotalCountTestnet }}) </option>
+                    <option value="privatenet">Theta Privatenet (keystores: {{ keystoreTotalCountPrivatenet }}) </option>
+                </select></td>
+            </tr>
+            <tr id="init_wallet_row">
+                <td>INIT. DISTRIBUTION/<br/>ADMIN WALLET&nbsp;</td>
+                <td>
+                    <select id="init_distr_wallet_keystore_id" name="init_distr_wallet_keystore_id">
+                        <option value="0"></option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>STAKER REWARDS<br/>/PER BLOCK&nbsp;</td>
+                <td>
+                    <select id="staker_reward_per_block" name="staker_reward_per_block">
+                        <option value="0">0</option>
+                        <option value="500000000000000000">0.125 (125000000000000000 wei)</option>
+                        <option value="500000000000000000">0.250 (250000000000000000 wei)</option>
+                        <option value="500000000000000000">0.500 (500000000000000000 wei)</option>
+                        <option value="1000000000000000000">1.00 (1000000000000000000 wei)</option>
+                        <option value="2000000000000000000" selected>2.00 (2000000000000000000 wei)</option>
+                        <option value="3000000000000000000">3.00 (3000000000000000000 wei)</option>
+                        <option value="4000000000000000000">4.00 (4000000000000000000 wei)</option>
+                        <option value="5000000000000000000">5.00 (5000000000000000000 wei)</option>
+                        <option value="6000000000000000000">6.00 (6000000000000000000 wei)</option>
+                        <option value="7000000000000000000">7.00 (7000000000000000000 wei)</option>
+                        <option value="8000000000000000000">8.00 (8000000000000000000 wei)</option>
+                        <option value="9000000000000000000">9.00 (9000000000000000000 wei)</option>
+                        <option value="10000000000000000000">10 (10000000000000000000 wei)</option>
+                        <option value="11000000000000000000">11 (11000000000000000000 wei)</option>
+                        <option value="12000000000000000000">12 (12000000000000000000 wei)</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="checkbox" name="enable" checked> Activate (Enable)
+
+                    <br/>
+                </td>
+            </tr>
+        </table>
+        </div>
+        <div style="float: right; position: absolute;bottom: -50px;"><button type="cancel">Cancel</button> <button type="submit">Save</button></div>
+    </form>
+<script>
+
+    const contractJsonInput = document.getElementById('subchain_governance_token_json');
+    const row_contract_address = document.getElementById('row_contract_address');
+    const row_subchain_governance_token_json = document.getElementById('row_subchain_governance_token_json');
+    const row_contract_json = document.getElementById('contract_json');
+    const row_contract_json_file_select = document.getElementById('contract_json_file_select');
+
+    row_contract_address.style.display = 'none';
+    row_contract_json.style.display = 'none';
+    row_contract_json_file_select.style.display = 'none';
+
+    const adminKeystoreId = document.getElementById('init_distr_wallet_keystore_id');
+    const submitButton = document.querySelector('button[type=submit]');
+    const cancelButton = document.querySelector('button[type=cancel]');
+
+    submitButton.disabled = true;
+    submitButton.style.backgroundColor = 'darkgray'; // Set initial dark background color
+
+    function validateConfiguration() {
+        if (adminKeystoreId.selectedIndex > 0) {
+            submitButton.style.backgroundColor = ''; // Reset to normal background color
+            submitButton.disabled = false;
+        } else {
+            submitButton.style.backgroundColor = 'darkgray'; // Reset to normal background color
+            submitButton.disabled = true;
+        }
+    }
+
+    adminKeystoreId.addEventListener('change', function() { validateConfiguration() });
+
+    cancelButton.addEventListener('click', () => {
+
+        window.history.back();
+    });
+
+    document.getElementById('mint_token').addEventListener('change', function() {
+
+        if (this.value >= 1) {
+
+            row_subchain_governance_token_json.style.display = '';
+            row_contract_address.style.display = 'none';
+            row_contract_json.style.display = '';
+            row_contract_json_file_select.style.display = '';
+            if  (this.value >= 2) {
+
+                row_contract_json.style.display = 'none';
+                row_contract_json_file_select.style.display = 'none';
+            }
+        } else {
+
+            row_subchain_governance_token_json.style.display = 'none';
+            row_contract_json_file_select.style.display = 'none';
+            row_contract_address.style.display = '';
+            row_contract_json.style.display = 'none';
+        }
+    });
+
+    document.getElementById('mainchain').addEventListener('change', function() {
+
+        const mainchainValue = this.value;
+
+        fetch('http://localhost:3000/keystore/keystores/enabled')
+            .then(response => response.json())
+            .then(data => {
+
+                let select = document.getElementById('init_distr_wallet_keystore_id');
+
+                select.innerHTML = '<option value="0">Select Init. Wallet Keystore...</option>'; // reset the dropdown
+                for(let item of data) {
+
+                    let keystore = JSON.parse(item.keystore); // parsing the keystore
+                    let tags = JSON.parse(item.tags); // parsing the tags
+
+                    if(tags[mainchainValue] === 1) { // checking if the selected mainchain is 1 in tags
+
+                        let option1 = document.createElement('option');
+                        option1.value = item.id;
+                        option1.text = item.name + ' (0x' + keystore.address.substring(0, 3) + '...' + keystore.address.slice(-4) + ')';
+                        select.appendChild(option1);
+                    }
+                }
+            })
+            .catch(error => console.error(error));
+    });
+
+    contractJsonInput.addEventListener('click', () => {
+
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (event) => {
+
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = () => {
+
+            contractJsonInput.value = reader.result;
+        };
+
+        reader.readAsText(file);
+    });
+
+</script>
+{% endblock %}

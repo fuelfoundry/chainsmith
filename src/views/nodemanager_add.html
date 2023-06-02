@@ -1,0 +1,207 @@
+{% extends 'layout.html' %}
+
+{% block title %}ChainSmith - NodeForge - Add Node{% endblock %}
+
+{% block content %}
+
+<h2>NODE MANAGER</h2>
+
+<h3>ADD NODE</h3>
+    <form action="/nodemanager/add" method="post" style="position: relative;width:100%;vertical-align: top;" class="fuelform">
+        <div>
+        <table style="vertical-align: text-top;">
+            <tr>
+                <td>NAME</td>
+                <td><input type="text" name="node_name" placeholder="Subchain Validator Node #1 on Theta Mainnet" required></td>
+            </tr>
+            <tr>
+                <td>TYPE</td>
+                <td><select id="node_type" name="node_type">
+                    <option value="0">Select Type...</option>
+                    <option value="1">Theta Mainchain Walletnode (+RPC)</option>
+                    <option value="2">Theta Subchain Validator (+RPC)</option>
+
+                </select></td>
+            </tr>
+            <tr>
+                <td>NETWORK &nbsp; &nbsp;</td>
+                <td><select id="mainchain" name="mainchain">
+                    <option value="0">Select Network...</option>
+                    <option value="mainnet">Theta Mainnet (keystores: {{ keystoreTotalCountMainnet }}) </option>
+                    <option value="testnet">Theta Testnet (keystores: {{ keystoreTotalCountTestnet }}) </option>
+                    <option value="privatenet">Theta Privatenet (keystores: {{ keystoreTotalCountPrivatenet }}) </option>
+                </select></td>
+            </tr>
+            <tr id="validator_row">
+                <td>KEYSTORE&nbsp;</td>
+                <td>
+                    <select id="keystore_id" name="keystore_id">
+                        <option value="0">Select Keystore...</option>
+                    </select>
+                </td>
+            </tr>
+            <tr id="genesis_row">
+                <td>GENESIS&nbsp;</td>
+                <td>
+                    <select id="genesis_id" name="genesis_id">
+                        <option value="0">Select Genesis...</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>ACCESS &nbsp;</td>
+                <td><select id="is_local" name="is_local">
+                   {% if local_os == 'LinuxXx' %}
+                    <option value="1">Local ({{ local_user }}@{{ local_hostname }} on {{ local_os }}) </option>
+                    {% else %}
+                    <option value="-1">Select Access... </option>
+                    {% endif %}
+                    <option value="0">Remote/Local (via SSH)</option>
+                </select></td>
+            </tr>
+            <tr id="host_row">
+                <td>HOST</td>
+                <td><input type="text" name="host" value="localhost" required></td>
+            </tr>
+            <tr id="username_row">
+                <td>SSH USER</td>
+                <td><input type="text" name="ssh_user" value="{{ local_user }}" required></td>
+            </tr>
+            <tr id="password_row">
+                <td>SSH PASS</td>
+                <td><input type="password" name="ssh_pass" value="" required></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="checkbox" name="enable" checked> Activate (Enable)
+
+                    <br/>
+                </td>
+            </tr>
+        </table>
+        </div>
+        <div style="float: right; position: absolute;bottom: -50px;"><button type="cancel">Cancel</button> <button type="submit">Save</button></div>
+    </form>
+<script>
+
+    const fileInput = document.getElementById('fileInput');
+    const form = document.querySelector('form');
+    const cancelButton = document.querySelector('button[type=cancel]');
+    const isLocalSelect = document.getElementById('is_local');
+    const hostRow = document.getElementById('host_row');
+    const usernameRow = document.getElementById('username_row');
+    const passwordRow = document.getElementById('password_row');
+    const validatorRow = document.getElementById('validator_row');
+    const nodeTypeSelect = document.getElementById('node_type');
+    const genesisRow = document.getElementById('genesis_row');
+    const mainchainSelectElement = document.getElementById('mainchain');
+
+    // hide additional rows initially
+    hostRow.style.display = 'none';
+    usernameRow.style.display = 'none';
+    passwordRow.style.display = 'none';
+    validatorRow.style.display = 'none';
+    genesisRow.style.display = 'none';
+
+    cancelButton.addEventListener('click', () => {
+
+        window.history.back();
+    });
+
+    function handleNodeTypeChange() {
+
+        if (nodeTypeSelect.value > 0) {
+
+            fetch('http://localhost:3000/genesisforge/genesis/enabled')
+                .then(response => response.json())
+                .then(data => {
+
+                    let select = document.getElementById('genesis_id');
+
+                    select.innerHTML = '<option value="0">Select Genesis...</option>'; // reset the dropdown
+
+                    for (let item of data) {
+
+                        let mainchain = item.mainchain;
+
+                        if (mainchain === mainchainSelectElement.value) {
+
+                            let option1 = document.createElement('option');
+                            option1.value = item.id;
+                            option1.text = item.name + ' (' + item.genesis_blockhash.substring(0, 3) + '...' + item.genesis_blockhash.slice(-4) + ')';
+
+                            select.appendChild(option1);
+                        }
+                    }
+                })
+                .catch(error => console.error(error));
+
+            // show
+            validatorRow.style.display = '';
+
+            if (this.value == 2) {
+
+                genesisRow.style.display = '';
+            }
+        } else {
+
+            // hide
+            validatorRow.style.display = 'none';
+            genesisRow.style.display = 'none';
+        }
+    }
+
+    nodeTypeSelect.addEventListener('change', handleNodeTypeChange);
+
+    isLocalSelect.addEventListener('change', function() {
+
+        if (this.value === '0') {
+
+            // show
+            hostRow.style.display = '';
+            usernameRow.style.display = '';
+            passwordRow.style.display = '';
+
+        } else {
+
+            // hide
+            hostRow.style.display = 'none';
+            usernameRow.style.display = 'none';
+            passwordRow.style.display = 'none';
+        }
+    });
+
+    document.getElementById('mainchain').addEventListener('change', function() {
+
+        const mainchainValue = this.value;
+
+        fetch('http://localhost:3000/keystore/keystores/enabled')
+            .then(response => response.json())
+            .then(data => {
+
+                let select = document.getElementById('keystore_id');
+
+                select.innerHTML = '<option value="0">Select Keystore...</option>'; // reset the dropdown
+
+                for(let item of data) {
+
+                    let keystore = JSON.parse(item.keystore); // parse keystore
+                    let tags = JSON.parse(item.tags); // parse tags
+
+                    if(tags[mainchainValue] === 1) { // checking if the selected mainchain is 1 in tags
+
+                        let option1 = document.createElement('option');
+                        option1.value = item.id;
+                        option1.text = item.name + ' (0x' + keystore.address.substring(0, 3) + '...' + keystore.address.slice(-4) + ')';
+
+                        select.appendChild(option1);
+                    }
+                }
+            })
+            .catch(error => console.error(error));
+
+        handleNodeTypeChange();
+    });
+
+</script>
+{% endblock %}

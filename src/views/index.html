@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html  lang="en, nl">
+<head>
+    <meta charset="utf-8">
+    <title>ChainSmith - Login</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css">
+</head>
+<body class="not-loggedin">
+<div class="login">
+
+    <form action="/" method="post">
+
+        <img src="/img/fuelfoundry_chainsmith_logo_03.png" width="500"/>
+        <div class="login-fields">
+            <div>
+                <label for="username"></label>
+                <input type="text" name="username" placeholder="Username" id="username" required>
+                <label for="password"></label>
+                <input type="password" name="password" placeholder="Password" id="password" required>
+                <div class="msg">{{ msg }}</div>
+                <input type="submit" value="LOGIN">
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>

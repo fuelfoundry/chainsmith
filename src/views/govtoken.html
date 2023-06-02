@@ -1,0 +1,165 @@
+{% extends 'layout.html' %}
+
+{% block title %}ChainSmith - TokenForge{% endblock %}
+
+{% block content %}
+
+<h2>TOKENFORGE</h2>
+
+{% if added %}
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    Governance Token added successfully. Click <i class="fa-solid fa-rocket"></i> below to deploy. &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;
+</div>
+{% else %}
+
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    Governance structure of Theta Metachain subchains is facilitated through integration with a mainchain TNT-20 token, which is further enhanced and secured by token staking. Our engineering specialists at FuelFoundry recommend a strategic allocation of at least one-third of accessible TNT-20 tokens towards subchain governance. This action serves as a protective measure against the infrequent but plausible risk of subchain usurpation.
+</div>
+
+{% endif %}
+
+<h3>GOVERNANCE TOKENS &mdash; ACTIVE &nbsp;<a style="color:rgb(42, 184, 230);" href="/govtoken/add">+</a></h3>
+<div class="metastore-container"></div>
+
+<h3>GOVERNANCE TOKENS &mdash; PROVISIONED &nbsp;<a style="color:rgb(42, 184, 230);" href="/govtoken/add">+</a></h3>
+<div class="metastore-container-disabled"></div>
+
+<script>
+
+    fetchConfigurations(document.querySelector('.metastore-container'), 'enabled');
+    fetchConfigurations(document.querySelector('.metastore-container-disabled'), 'disabled');
+
+    async function fetchConfigurations(container, state) {
+
+        try {
+
+            const response = await fetch('/govtoken/govtokens/' + state);
+            const profiles = await response.json();
+
+            const profilesWithAddress = await Promise.all(profiles.map(async (profile) => {
+                const res1 = await fetch('/keystore/id/' + profile.init_distr_wallet_keystore_id);
+                const keyData1 = await res1.json();
+
+                return {
+
+                    ...profile,
+                    init_distr_wallet_keystore: keyData1.keystore.address
+                };
+            }));
+
+        container.innerHTML = profilesWithAddress.map(({id, name, address, symbol, mainchain, staker_reward_per_block, init_distr_wallet_keystore, init_distr_wallet_keystore_id, tx_hash, dynasty, last_state, last_update}) => `
+            <div class="metastore-childnode">
+              <div class="metadiv-relative">
+                <div class="meta-ident">
+                <p id="state${id}">
+          ${last_state === -1 ? 'NOT DEPLOYED' : ''}
+          ${last_state === 0 ? 'ERROR' : ''}
+          ${last_state > 0 && last_state < 5 ? 'PROCESSING' : ''}
+          ${last_state >= 5 && last_state < 9 ? 'MINTING' : ''}
+          ${last_state === 10 ? 'MINTED SUCCESSFULLY TO MAINCHAIN' : ''}
+</p><p>${id}</p></div>
+                <p>${name}</p>
+                <table>
+            <tr>
+              <td>NETWORK</td>
+              <td>${mainchain}</td>
+            </tr>
+            <tr>
+              <td>SYMBOL</td>
+              <td>${symbol}</td>
+            </tr>
+            <tr>
+              <td>STAKER REWARDS/BLOCK</td>
+              <td>${String(parseFloat(staker_reward_per_block).toFixed(0))} (wei)</td>
+            </tr>
+            <tr>
+              <td>CONTRACT ADDRESS &nbsp;</td>
+              <td>${address.length > 20 ? `<a class="meta-link" target="_blank" href="https://testnet-explorer.thetatoken.org/account/${address}">${address}</a>` : 'Pending deployment'}</td>
+            </tr>
+            <tr>
+              <td>ADMIN/DISTRO WALLET</td>
+              <td><a class="meta-link" target="_blank" href="https://testnet-explorer.thetatoken.org/account/${init_distr_wallet_keystore}">0x${init_distr_wallet_keystore}</a> (id: ${init_distr_wallet_keystore_id})</td>
+            </tr>
+            <tr>
+              <td>TRANSACTION HASH</td>
+              <td><a class="meta-link" target="_blank" href="https://testnet-explorer.thetatoken.org/txs/${tx_hash}" >${tx_hash}</a> (dynasty: ${dynasty})</td>
+            </tr>
+            <tr>
+              <td>LAST UPDATE </td>
+              <td>${last_update} UTC</td>
+            </tr>
+          </table>
+                <div class="metabuttons-container">
+              ${last_state === -1 ? `<a title="Deploy Governance Token to Mainchain"><button id="deploy${id}" onclick="deployGovToken('${id}')"><i style="color:#2ee4be" class="fa-solid fa-rocket"></i></button></a>` : ``}
+              <a href="/govtoken/edit/${id}" title="Edit Governance Token"><button ><i class="fa-solid fa-edit"></i></button></a>
+          </div><i class="fa-solid fa-coins"></i>
+              </div>
+            </div>
+          <br/>`).join('');
+        } catch (error) {
+
+            console.error(error);
+        }
+    }
+// <a href="/govtoken/status/${id}" title="Refresh Status"><button><i className="fa-solid fa-arrows-rotate"></i></button></a>
+    function disableButton(id) {
+
+        const button = document.getElementById(`deploy${id}`);
+
+        if (button) {
+
+            button.disabled = true;
+            button.style.backgroundColor = "#333333";
+        }
+    }
+
+    async function deployGovToken(id) {
+
+        disableButton(id);
+
+        console.log('deployGovToken called');
+        showToast('Forging Governance Token...', '#2caed7');
+
+        fetch(`/govtoken/deploy/${id}`);
+
+        let lastState = -1;
+
+        while (lastState < 10) {
+
+            console.log('status cycler init.')
+            await new Promise(r => setTimeout(r, 4200));
+
+            const response = await fetch(`/govtoken/status/${id}`);
+            console.log('response:',response);
+
+            const { last_update, last_state, status } = await response.json();
+
+            if (last_state !== lastState) {
+
+                lastState = last_state;
+                console.log(last_update, 'lastState:',lastState);
+                showToast(status, '#2caed7');
+            }
+
+            if (last_state < 0) {
+                lastState = last_state;
+                // an error has occured
+                break;
+            }
+        }
+
+        if (lastState === -1) {
+
+            console.log('Error occured while minting');
+            showToast("Error: Verify Keystore / connection and try again", '#9faed7');
+        } else {
+
+            console.log('Mint Complete:');
+            showToast('Mint complete.  Refreshing...', '#2caed7');
+        }
+
+        await new Promise(r => setTimeout(r, 2555));
+        location.reload();
+    }
+</script>
+{% endblock %}

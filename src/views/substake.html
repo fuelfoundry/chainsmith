@@ -1,0 +1,217 @@
+{% extends 'layout.html' %}
+
+{% block title %}ChainSmith - StakeForge{% endblock %}
+
+{% block content %}
+
+<h2>STAKEFORGE</h2>
+
+{% if added %}
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    Stake added successfully. &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+
+</div>
+{% else %}
+
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    Subchains within the Theta Metachain function akin to any contemporary blockchain due to their inherent decentralization. This characteristic allows any individual, granted they possess a sufficient quantity of your governance token, to potentially initialize a validator node on your subchain. Should they stake the majority of your token, they could significantly influence the operation of your subchain. As a precautionary measure, we recommend that from inception, you stake a minimum of one-third of your governance token's total circulation.
+</div>
+
+{% endif %}
+
+<h3>STAKES &mdash; ACTIVE &nbsp;<a style="color:rgb(42, 184, 230);" href="/substake/add">+</a></h3>
+<div class="metastore-container"></div>
+
+<h3>STAKES &mdash; PROVISIONED &nbsp;<a style="color:rgb(42, 184, 230);" href="/substake/add">+</a></h3>
+<div class="metastore-container-disabled"></div>
+
+<script>
+    fetchConfigurations(document.querySelector('.metastore-container'), 'enabled');
+    fetchConfigurations(document.querySelector('.metastore-container-disabled'), 'disabled');
+
+    async function fetchConfigurations(container, state) {
+    //subchain_generate_genesis -mainchainID=privatenet -subchainID=tsub360777 -initValidatorSet=./data/init_validator_set.json -admin=0x2E833968E5bB786Ae419c4d13189fB081Cc43bab -fallbackReceiver=0x2E833968E5bB786Ae419c4d13189fB081Cc43bab -genesis=./snapshot
+    try {
+        const response = await fetch('/substake/substakes/' + state);
+        const profiles = await response.json();
+
+        const profilesWithAddress = await Promise.all(profiles.map(async (profile) => {
+            const res1 = await fetch('/keystore/id/' + profile.admin_keystore_id);
+            const keyData1 = await res1.json();
+            const res2 = await fetch('/nodemanager/nodes/enabled');
+            const keyData2 = await res2.json();
+            const res3 = await fetch('/substake/substakes/enabled');
+            const genesis_pool = await res3.json();
+            const res4 = await fetch('/subchain/subchains/enabled');
+            const keyData4 = await res4.json();
+
+            const res5 = await fetch('/keystore/id/' + profile.validator_keystore_id);
+            const keyData5 = await res5.json();
+
+            const filtered_substakes = profiles.filter(item => genesis_pool.initial_validator1_keystore_id === profile.validator_keystore_id && item.mainchain === keyData1.mainchain);
+
+            let substake_select_html = '<select name="stake_amount">';
+            filtered_substakes.forEach((item) => {
+                substake_select_html += `<option value="${item.id}">${item.name}</option>`;
+            });
+            substake_select_html += '</select>';
+
+            validator_keystore_address = keyData1.keystore.address
+            return {
+                ...profile,
+                admin_keystore_wallet: keyData1.keystore.address,
+                node_pool: keyData2,
+                genesis_pool,
+                subchain_pool: keyData4,
+                filtered_substakes: filtered_substakes,
+                substake_select_html,
+                validator_keystore_id: profile.validator_keystore_id,
+                validator_keystore_address: keyData5.keystore.address
+            };
+        }));
+
+       // id, name, mainchain, type, subchain_id, admin_keystore_id, validator_keystore_id, govtoken_id, govtoken_stake_wei, wtheta_collateral_wei, tfuel_fee_wei,
+       //     govtoken_approve_tx_hash, govtoken_stake_tx_hash, wtheta_collateral_tx_hash, tfuel_fee_in_wei_tx_hash, vcm_address, vsm_address, validator_set,
+       //     dynasty,next_validator_set,next_dynasty,last_state,last_update
+
+
+            //initial_validator1_keystore, initial_validator1_keystore_id, initial_validator1_govtoken_stake,
+            container.innerHTML = profilesWithAddress.map(({id, name, mainchain, type, subchain_id, admin_keystore_id, admin_keystore_wallet, validator_keystore_id, validator_keystore_address, govtoken_id, govtoken_stake_wei, wtheta_collateral_wei, tfuel_fee_wei,
+                                                               govtoken_approve_tx_hash, govtoken_stake_tx_hash, wtheta_collateral_tx_hash, tfuel_fee_tx_hash, vcm_address, vsm_address, validator_set,
+                                                               dynasty,next_validator_set,next_dynasty,last_state,last_update }) => `
+
+     <div class="metastore-childnode">
+              <div class="metadiv-relative">
+                <div class="meta-ident">
+                <p id="state${id}">
+ ${last_state === -1 ? 'NOT DEPLOYED' : ''}
+          ${last_state === 0 ? 'ERROR' : ''}
+          ${last_state > 0 && last_state < 5 ? 'INSTALLING' : ''}
+          ${last_state >= 5 && last_state < 9 ? 'ERROR' : ''}
+          ${last_state === 10 ? 'DEPLOYED SUCCESSFULLY TO MAINCHAIN' : ''}
+ </p><p>${id}</p></div>
+                <p>${name}</p>
+          <table>
+            <tr>
+                <td>NETWORK</td>
+                <td>${mainchain}</td>
+            </tr>
+            <tr>
+                <td>STAKE TYPE</td>
+                <td>${type}</td>
+            </tr>
+            <tr>
+                <td>VALIDATOR GOVTOKEN STAKE</td>
+                <td>${govtoken_stake_wei.slice(0, -18)} (wei: ${govtoken_stake_wei})</td>
+            </tr>
+            <tr>
+                <td>VALIDATOR WTHETA STAKE</td>
+                <td>${wtheta_collateral_wei.slice(0, -18)} (wei: ${wtheta_collateral_wei})</td>
+            </tr>
+            <tr>
+                <td>VALIDATOR TFUEL STAKE</td>
+                <td>${tfuel_fee_wei.slice(0, -18)} (wei: ${tfuel_fee_wei})</td>
+            </tr>
+            <tr>
+                <td>VALIDATOR ADDRESS</td>
+                <td><a class="meta-link" target="_blank" href="https://testnet-explorer.thetatoken.org/account/${validator_keystore_address}">0x${validator_keystore_address}</a> (id: ${validator_keystore_id})</td>
+            </tr>
+            <tr>
+                <td>MAINCHAIN ADMIN</td>
+                <td><a class="meta-link" target="_blank" href="https://testnet-explorer.thetatoken.org/account/${admin_keystore_wallet}">0x${admin_keystore_wallet}</a> (id: ${admin_keystore_id})</td>
+            </tr>
+            <tr>
+                <td>GOVTOKEN APPROVAL</td>
+                <td>${govtoken_approve_tx_hash.length > 20 ? `<a class="meta-link" target="_blank" href="https://testnet-explorer.thetatoken.org/tx/${govtoken_approve_tx_hash}">${govtoken_approve_tx_hash}</a>` : 'Pending deployment'}</td>
+            </tr>
+            <tr>
+                <td>GOVTOKEN STAKE</td>
+                <td>${govtoken_stake_tx_hash.length > 20 ? `<a class="meta-link" target="_blank" href="https://testnet-explorer.thetatoken.org/tx/${govtoken_stake_tx_hash}">${govtoken_stake_tx_hash}</a>` : ''}</td>
+            </tr>
+            <tr>
+                <td>WTHETA COLLATERAL</td>
+                <td>${wtheta_collateral_tx_hash.length > 20 ? `<a class="meta-link" target="_blank" href="https://testnet-explorer.thetatoken.org/tx/${wtheta_collateral_tx_hash}">${wtheta_collateral_tx_hash}</a>` : ''}</td>
+            </tr>
+            <tr>
+                <td>TFUEL APPROVAL</td>
+                <td>${tfuel_fee_tx_hash.length > 20 ? `<a class="meta-link" target="_blank" href="https://testnet-explorer.thetatoken.org/tx/${tfuel_fee_tx_hash}">${tfuel_fee_tx_hash}</a>` : ''}</td>
+            </tr>
+            <tr>
+                <td>DYNASTY</td>
+                <td>${dynasty.toString().length > 2 ? `${dynasty}` : ''}</td>
+            </tr>
+            <tr>
+                <td>LAST UPDATED</td>
+                <td>${last_update} UTC</td>
+            </tr>
+          </table>
+          <div class="metabuttons-container">
+              ${last_state < 10 ? `<a title="Deploy Stake to Subchain Validator"><button id="deploy${id}" onclick="deploySubstake(`+id+`)"><i style="color:#2ee4be" class="fa-solid fa-rocket"></i></button></a>` : ''}
+              <a href="/substake/edit/${id}" title="Start Node"> <button><i class="fas fa-edit"></i></button></a>
+          </div><i class="fa-solid fa-landmark"></i> &nbsp; ${last_state == -2 ? '<div class="state-error">ERROR</div>' : ''}
+              </div>
+            </div>
+
+      <br/>
+        `).join('');
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+
+    function disableButton(id) {
+        const button = document.getElementById(`deploy${id}`);
+        if (button) {
+            button.disabled = true;
+            button.style.backgroundColor = "#333333";
+        }
+    }
+
+    async function deploySubstake(id) {
+
+        disableButton(id);
+
+        console.log('deploySubchain called');
+        showToast('Initializing Validator Stake...', '#2caed7');
+
+        fetch(`/substake/deploy/${id}`);
+
+        let lastState = -1;
+        while (lastState < 10) {
+            console.log('subchain status cycler called')
+            await new Promise(r => setTimeout(r, 2200));
+
+            const response = await fetch(`/substake/status/${id}`);
+            console.log('response:',response);
+
+            const { last_update, last_state, status } = await response.json();
+
+            if (last_state !== lastState) {
+                lastState = last_state;
+                console.log(last_update, 'lastState:',lastState);
+                showToast(status, '#2caed7');
+            }
+
+            if (last_state < 0) {
+                console.log('ERROR AT STAGE:',lastState);
+                lastState = last_state;
+
+                // an error has occured
+                break;
+            }
+        }
+
+        if (lastState === -1) {
+            console.log('Error occurred, please try again or contract support.');
+            showToast("Error occurred, please try again or contract support.", '#9faed7');
+        } else {
+            console.log('Stake and collateral deployment successful');
+            showToast('Deployment complete.  Please standby, refreshing in one block...', '#2caed7');
+        }
+
+        await new Promise(r => setTimeout(r, 7000));
+        location.reload();
+    }
+</script>
+{% endblock %}

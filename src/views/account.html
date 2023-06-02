@@ -1,0 +1,115 @@
+{% extends 'layout.html' %}
+
+{% block title %}ChainSmith - Settings - Account{% endblock %}
+
+{% block content %}
+
+<h2>SETTINGS</h2>
+
+{% if added %}
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    Account updated successfully
+</div>
+{% else %}
+
+{% endif %}
+
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    Enable military grade AES-256-GCM password encryption, revise administrative credentials, adjust communication and notification preferences, review RPC server specifications, and misc. settings.
+</div>
+
+<h3>ACCOUNT &mdash; ADMIN</h3>
+<div class="metastore-container"></div>
+<br>
+<br>
+<h3> &nbsp;</h3>
+<div class="metastore-container-disabled"></div>
+
+<script>
+    fetchAccounts(document.querySelector('.metastore-container'), 'enabled');
+
+    function fetchAccounts(container, keystore_state) {
+        fetch('/account/accounts/'+keystore_state)
+            .then(response => response.json())
+            .then(keystores => {
+                container.innerHTML = keystores.map(({id, username, password_encrypted, email, email_notify, eth_rpc_privatenet, theta_rpc_privatenet, theta_rpc_testnet, theta_rpc_mainnet, eth_rpc_testnet, eth_rpc_mainnet, last_state }) => `
+<div class="metastore-childnode">
+<div class="metadiv-relative">
+<div class="meta-ident">
+<p id="state${id}">
+${last_state < 10 ? 'UNENCRYPTED' : 'SECURE'}
+</p><p>${id}</p></div>
+<p style="color:#fe5413">${username}</p>
+          <table>
+
+            <tr>
+              <td>PASSWORD</td>
+              <td>*********</td>
+            </tr>
+            <tr>
+                <td>ENCRYPT ALL PASSWORDS</td>
+                <td>
+                 ${password_encrypted === 0 ? `***Not Encrypted***` : `Encryption Enabled`}
+                </td>
+            </tr>
+            <tr>
+              <td>EMAIL</td>
+              <td>${email}</td>
+            </tr>
+            <tr>
+              <td>EMAIL NOTIFICATION</td>
+              <td>${email_notify === 0 ? `Disabled` : `Enabled`}</td>
+            </tr>
+            <tr>
+              <td>LEDGER SORT ORDER</td>
+              <td>Descending</td>
+            </tr>
+            <tr>
+              <td>INTEGRATED EXPLORER</td>
+              <td>Theta Testnet (<a class="meta-link" target="_blank" href="https://testnet-explorer.thetatoken.org/">testnet-explorer.thetatoken.org</a>)</td>
+            </tr>
+            <tr>
+              <td>THETA RPC</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>&nbsp; &nbsp;PRIVATENET</td>
+              <td>${theta_rpc_privatenet}</td>
+            </tr>
+            <tr>
+              <td>&nbsp; &nbsp;TESTNET</td>
+              <td>${theta_rpc_testnet}</td>
+            </tr>
+            <tr>
+              <td>&nbsp; &nbsp;MAINNET</td>
+              <td>${theta_rpc_mainnet}</td>
+            </tr>
+            <tr>
+              <td>ETH RPC</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>&nbsp; &nbsp;PRIVATENET</td>
+              <td>${eth_rpc_privatenet}</td>
+            </tr>
+            <tr>
+              <td>&nbsp; &nbsp;TESTNET</td>
+              <td>${eth_rpc_testnet}</td>
+            </tr>
+            <tr>
+              <td>&nbsp; &nbsp;MAINNET</td>
+              <td>${eth_rpc_mainnet}</td>
+            </tr>
+          </table>
+          <div class="metabuttons-container">
+              <a href="/account/edit/${id}" title="Start Node"> <button><i class="fas fa-edit"></i></button></a>
+          </div><i class="fa-solid fa-user-gear"></i> &nbsp; ${last_state == -2 ? '<div class="state-error">ERROR</div>' : ''}
+              </div>
+            </div>
+          <br/>
+    `).join('');
+            })
+            .catch(error => console.error(error));
+    }
+</script>
+{% endblock %}

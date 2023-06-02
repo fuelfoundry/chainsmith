@@ -1,0 +1,226 @@
+{% extends 'layout.html' %}
+
+{% block title %}ChainSmith - StakeForge - Add Stake{% endblock %}
+
+{% block content %}
+
+<h2>STAKEFORGE</h2>
+
+<h3>ADD STAKE</h3>
+
+<form action="/substake/add" method="post" style="position: relative;width:100%;vertical-align: top;" class="fuelform">
+    <div>
+        <table style="vertical-align: text-top;">
+            <tr>
+                <td>NAME</td>
+                <td><input type="text" name="substake_name" placeholder="Validator #2 Initial Stake" required></td>
+            </tr>
+
+            <tr>
+                <td>NETWORK &nbsp; &nbsp;</td>
+                <td><select id="mainchain" name="mainchain">
+                    <option value="0">Select Network...</option>
+                    <option value="mainnet">Theta Mainnet (keystores: {{ keystoreTotalCountMainnet }}) </option>
+                    <option value="testnet">Theta Testnet (keystores: {{ keystoreTotalCountTestnet }}) </option>
+                    <option value="privatenet">Theta Privatenet (keystores: {{ keystoreTotalCountPrivatenet }}) </option>
+                </select></td>
+            </tr>
+
+            <tr>
+                <td>TYPE &nbsp; &nbsp;</td>
+                <td><select id="type" name="type">
+                    <option value="0">Select Stake Type...</option>
+                    <option value="validator-stake">New Validator Stake (GovToken + 1K wTHETA + 20K TFuel)</option>
+                    <option value="validator-stake-govonly">Governance Stake Only</option>
+
+                </select></td>
+            </tr>
+
+            <tr id="keystore_row">
+                <td>DISTRO/SOURCE KEYSTORE&nbsp;</td>
+                <td>
+                    <select id="admin_keystore_id" name="admin_keystore_id">
+                        <option value="0">Select Keystore...</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr id="keystore2_row">
+                <td>VALIDATOR KEYSTORE&nbsp;</td>
+                <td>
+                    <select id="validator_keystore_id" name="validator_keystore_id">
+                        <option value="0">Select Keystore...</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr id="govtoken_row">
+                <td>GOVTOKEN&nbsp;</td>
+                <td>
+                    <select id="govtoken_id" name="govtoken_id">
+                        <option value="0"></option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr id="govtoken_stake_row">
+                <td>GOVTOKEN STAKE AMOUNT&nbsp;</td>
+
+                <td><input type="text" name="govtoken_stake" placeholder="Note: 100 = 100000000000000000000 wei" maxlength="12" required></td>
+            </tr>
+
+            <tr id="subchain_row">
+                <td>SUBCHAIN&nbsp;</td>
+                <td>
+                    <select id="subchain_id" name="subchain_id">
+                        <option value="0"></option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td></td>
+                <td><input type="checkbox" name="enable" checked> Activate (Enable)
+
+                    <br/>
+                </td>
+            </tr>
+
+        </table>
+
+    </div>
+    <div style="float: right; position: absolute;bottom: -50px;"><button type="cancel">Cancel</button> <button type="submit">Save</button></div>
+</form>
+<script>
+
+    const fileInput = document.getElementById('fileInput');
+    const form = document.querySelector('form');
+    const submitButton = document.querySelector('button[type=submit]');
+    const cancelButton = document.querySelector('button[type=cancel]');
+    const subchainId = document.getElementById('subchain_id');
+    const govTokenId = document.getElementById('govtoken_id');
+
+    submitButton.disabled = true;
+    submitButton.style.backgroundColor = 'darkgray';
+
+    function validateConfiguration() {
+
+        if (govTokenId.selectedIndex > 0 && govTokenId.options[govTokenId.selectedIndex].text.slice(-7) != '(0x...)') {
+
+            submitButton.style.backgroundColor = '';
+            submitButton.disabled = false;
+        } else {
+
+            submitButton.style.backgroundColor = 'darkgray';
+            submitButton.disabled = true;
+        }
+    }
+
+    subchainId.addEventListener('change', function() { validateConfiguration() });
+    govTokenId.addEventListener('change', function() { validateConfiguration() });
+    cancelButton.addEventListener('click', () => { window.history.back() });
+
+    function updateSubchain() {
+
+        fetch('http://localhost:3000/subchain/subchains/enabled')
+            .then(response => response.json())
+            .then(data => {
+
+                let select = document.getElementById('subchain_id');
+
+                select.innerHTML = '<option value="0">Select Subchain...</option>'; // reset the dropdown
+
+                for(let item of data) {
+
+                    let subchain_mainchain = item.mainchain;
+
+                    if (mainchain.value === subchain_mainchain) {
+
+                    fetch('http://localhost:3000/genesisforge/id/'+String(item.genesis_id))
+                        .then(genesisResponse => genesisResponse.json())
+                        .then(genesis => {
+
+                            let subchain_chainId = genesis.subchain_id;
+                            console.log('genesis:',genesis);
+                            console.log('subchain_chainId:',subchain_chainId);
+
+                            let option1 = document.createElement('option');
+                            option1.value = item.id;
+                            option1.text = `[${subchain_mainchain}] ` + item.subchain_name + ' (subchain: ' + subchain_chainId + ')';
+                            select.appendChild(option1);
+                        })
+                        .catch(error => console.error(error));
+                    }
+                }
+            })
+            .catch(error => console.error(error));
+    }
+
+    function updateGovtoken() {
+
+        fetch('http://localhost:3000/govtoken/govtokens/enabled')
+            .then(response => response.json())
+            .then(data => {
+
+                let select = document.getElementById('govtoken_id');
+
+                select.innerHTML = '<option value="0">Select Government Token...</option>'; // reset the dropdown
+
+                // -tom: add /10 option
+                //
+                for(let item of data) {
+
+                    let govtoken_mainchain = item.mainchain;
+
+                    if (mainchain.value === govtoken_mainchain) {
+
+                        let option1 = document.createElement('option');
+                        option1.value = item.id;
+                        option1.text = `[${govtoken_mainchain}] ` + item.name + ' (0x' + item.address.substring(0, 5) + '...' + item.address.slice(-4) + ')';
+                        select.appendChild(option1);
+                    }
+                }
+            })
+            .catch(error => console.error(error));
+    }
+
+
+    document.getElementById('mainchain').addEventListener('change', function() {
+
+        const mainchainValue = this.value;
+
+        fetch('http://localhost:3000/keystore/keystores/enabled')
+            .then(response => response.json())
+            .then(data => {
+
+                let select = document.getElementById('admin_keystore_id');
+                let select2 = document.getElementById('validator_keystore_id');
+
+                select.innerHTML = '<option value="0">Select Source Keystore...</option>'; // reset the dropdown
+                select2.innerHTML = '<option value="0">Select Validator Keystore...</option>'; // reset the dropdown
+
+                for(let item of data) {
+
+                    let keystore = JSON.parse(item.keystore); // parsing the keystore
+                    let tags = JSON.parse(item.tags); // parsing the tags
+                    if(tags[mainchainValue] === 1) { // checking if the selected mainchain is 1 in tags
+                        let option1 = document.createElement('option');
+                        option1.value = item.id;
+                        option1.text = item.name + ' (0x' + keystore.address.substring(0, 3) + '...' + keystore.address.slice(-4) + ')';
+                        select.appendChild(option1);
+
+                        let option2 = document.createElement('option');
+                        option2.value = item.id;
+                        option2.text = item.name + ' (0x' + keystore.address.substring(0, 3) + '...' + keystore.address.slice(-4) + ')';
+                        select2.appendChild(option2);
+                    }
+                }
+            })
+            .catch(error => console.error(error));
+
+        updateSubchain();
+        updateGovtoken();
+    });
+
+</script>
+{% endblock %}

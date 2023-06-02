@@ -1,0 +1,104 @@
+{% extends 'layout.html' %}
+
+{% block title %}Welcome to ChainSmith - Your Theta Metachain Wizard{% endblock %}
+
+{% block content %}
+<h2>CHAINGUIDE</h2>
+
+<ul class="tabs" role="tablist">
+    <li>
+        <input type="radio" name="tabs" id="tab1" checked />
+        <label for="tab1"
+               role="tab"
+               aria-selected="true"
+               aria-controls="panel1"
+               tabindex="0">Introduction</label>
+        <div id="tab-content1"
+             class="tab-content"
+             role="tabpanel"
+             aria-labelledby="description"
+             aria-hidden="false">
+            <p>Greetings:<br/><br/>
+
+                We cordially welcome you to ChainSmith, a product of FuelFoundry. It's our privilege to facilitate your subchain exploration and deployment, as we firmly believe that our platform will play a pivotal role in your endeavor.<br/><br/>
+
+                Our team has put enormous dedication and professional expertise into the development of ChainSmith, and we hope this dedication is reflected in your experience, making the deployment of your subsequent subchain(s) seamless.<br/><br/>
+
+                In the event of any questions or issues that may arise during your use of ChainSmith, please do not hesitate to contact our support team. We're readily accessible via telephone, email, or our official Discord channel, where you can engage with our knowledgeable community for assistance. Our unwavering commitment is to ensure your experience with ChainSmith is as efficient and productive as possible.<br/><br/>
+
+                Thank you for choosing ChainSmith, we look forward to facilitating your Theta Metachain journey.<br/><br/>
+
+                Best regards,<br/><br/>
+                The FuelFoundry Team</p>
+        </div>
+    </li>
+
+    <li>
+        <input type="radio" name="tabs" id="tab2" />
+        <label for="tab2"
+               role="tab"
+               aria-selected="false"
+               aria-controls="panel2"
+               tabindex="0">Preface</label>
+        <div id="tab-content2"
+             class="tab-content"
+             role="tabpanel"
+             aria-labelledby="specification"
+             aria-hidden="true">
+            <p>A personal message from us to you:<br/><br/>
+
+                Before we delve into the details of the quick start guide, take a moment to breathe. We understand the process we're about to walk you through could seem quite daunting, especially if you're new to it. The world of blockchain, with its myriad of technologies and terminologies can be overwhelming.<br/><br/>
+
+                It may be time-consuming and complex at first, but with repetition, you'll find it becomes easier and more familiar. Like any other skill, proficiency comes with practice and patience. As you navigate through this process, don't lose sight of the unique and powerful capabilities you're unlocking.<br/><br/>
+
+                Moreover, know you're not alone in this journey. Should you encounter any issues, challenges, or simply have questions, FuelFoundry has your back. We're just a message or a call away. Our team has extensive experience and expertise in this field and we're always ready to assist you in achieving your blockchain goals.<br/><br/>
+
+                Now, let's dive into the step-by-step process of setting up your own subchain on Theta Metachain...<br/>
+            </p>
+        </div>
+    </li>
+
+    <li>
+        <input type="radio" name="tabs" id="tab3" />
+        <label for="tab3"
+               role="tab"
+               aria-selected="false"
+               aria-controls="panel3"
+               tabindex="0">Quickstart Guide</label>
+        <div id="tab-content3"
+             class="tab-content"
+             role="tabpanel"
+             aria-labelledby="specification"
+             aria-hidden="true">
+            <p>We recommend keeping this page open in a separate window while building your first subchain:
+            <h6>KeyForge</h6>To get started, add your desired keystores to the KeyForge. Keystores are critical in ensuring the safety of your digital assets.
+
+            <h6>GenesisForge</h6>Proceed by adding or forging a new subchain genesis through the GenesisForge. This process establishes the starting block of your subchain.
+
+            Be sure to backup your subchain genesis and config.yaml files by exporting them and securing them safely using the download tools available once your genesis is forged. They contain vital information that you will need to restore your subchain in case of any unforeseen disruptions.
+
+            <h6>TokenForge</h6>Configure your Governance Token by linking an existing contract or creating a new contract and deploying it to the Mainchain by utilizing the embedded Theta Metachain SDK. This token will be used to manage and govern your subchain.
+
+            <h6>ChainForge</h6>Create a new subchain in your local registry and register your new Subchain to the Mainchain. This action establishes the connection between your subchain and the Mainchain, and requires 10K wTHETA in the executor wallet.
+
+            <h6>StakeForge</h6>Stake governance tokens to your Subchain Validator Nodes For a robust subchain, add new validators and ensure they are properly staked.
+
+            <h6>NodeForge</h6>Next, add a Mainnet Walletnode and a Subchain Validator in NodeManager. Walletnodes and their corresponding ETH-RPC servers provide mainchain interop services, while subchain validators are responsible for creating new blocks on your subchain.
+
+            Nodes can be independently deployed or deployed all-at-once upon subchain configuration completion via the Metachain Configurator. While nodes can be configured to operate on different systems, we recommend installing both on the same system.
+
+            <h6>Success!</h6>
+                Congratulations, gefeliciteerd, 成, suksess, 성공! Whether it be on Private, Test or Mainnet, you have now deployed your own subchain on Theta Metachain! The beauty of Metachain lies in the flexibility and customizations it offers. We hope you make the most of these features to build a robust, secure, and effective subchain network.
+              <br/><br/>
+            The FuelFoundry Team
+            <br/><br/>
+
+        </div>
+    </li>
+</ul>
+
+<br style="clear: both;" />
+
+
+
+{% endblock %}

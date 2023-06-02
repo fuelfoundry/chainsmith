@@ -1,0 +1,960 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap');
+
+@import url("https://fonts.googleapis.com/css?family=Lato");
+
+.metadiv-relative {
+    position: relative;
+}
+
+
+
+
+.metastore-container > div > div > :first-child {
+    margin-right:7px;
+}
+
+.state-error {
+    position: absolute;
+    left: 0;
+
+    line-height: 10px;
+    padding: 0;
+    margin: 0;
+
+    font-size: 10px;
+    color: red;
+}
+.state-error:hover {
+
+    font-size: 10px;
+    color: red;
+}
+
+
+.node-status {
+    position: absolute;
+    left: 0;
+
+    line-height: 10px;
+    padding: 0;
+    margin: 0;
+
+    font-size: 10px;
+    color: #2ee4be;
+}
+.node-status:hover {
+
+    font-size: 10px;
+    color: #2ee4be;
+}
+
+
+.meta-ident > :first-child {
+    margin-right:7px;
+}
+
+.metastore-childnode:hover > .metadiv-relative > .meta-ident > p {
+    background:#4d6c85;
+}
+
+.meta-link {
+    margin-left: 0;
+    padding-left: 0;
+    font-size: 13px;
+
+   /* color: #ffffff; /*#29cad2; /*rgb(42, 184, 230);*/
+
+}
+
+.meta-link:hover {
+    color:#fe5413;
+    -webkit-transition: color 0.3s;
+    transition: color 0.3s;
+    opacity: 0.9;
+    text-decoration: none;
+}
+
+/*
+///////
+///////
+*/
+
+.content .metastore-container {
+    margin:0;
+    padding:0;
+}
+
+.metastore-childnode {
+    background: #18394c;
+    margin-top:1px;
+    margin-bottom:1px;
+    padding:25px 15px;
+    border-radius:5px;
+}
+
+.metastore-container > div > div > a, .metastore-container-disabled > div > div > a {
+    padding:0;
+    margin:0;
+}
+
+.metastore-container > div > div > a > div, .metastore-container-disabled > div > div > a > div {
+    display:flex;
+    margin-top:6px;
+}
+/*
+.metastore-container > div > div > div {
+    padding:1px 12px;
+    font-size:10px;
+    border-radius:3px;
+
+}*/
+
+
+.metastore-container > div > div > div > :last-child, .metastore-container > div > div > div > :first-child {
+    padding:1px 12px;
+    font-size:10px;
+    border-radius:3px;
+}
+
+.metastore-container-disabled > div > div > div > :last-child, .metastore-container-disabled > div > div > div > :first-child {
+    padding:1px 12px;
+    font-size:10px;
+    border-radius:3px;
+}
+
+.meta-ident {
+
+    margin-left:10px;
+    margin-right:10px;
+    border-radius:3px;
+    float: right;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+.meta-ident > p {
+
+    margin: 0 0 10px 0;
+    border-radius:3px;
+    padding-left: 0;
+    font-size:10px;
+    background:#2a536a;
+    position: relative;
+}
+
+
+.metabuttons-container {
+
+    padding:1px 1px;
+    float: right;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    text-align: right;
+    color:#666;
+}
+
+
+/*
+///////
+ */
+.toast {
+    background-color: #2f4d67; /*19384C; /*rgba(0, 0, 0, 0.5); /*Adjust the alpha value as needed */
+    color: #2caed7;
+    z-index: 9999999;
+
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    padding: 8px;
+}
+
+.alert {
+    text-align: justify;
+    z-index: 9999;
+}
+
+.content h6 {
+    margin: 0;
+    padding-top: 30px;
+    padding-bottom: 20px;
+    font-size: 24px;
+    font-weight: lighter;
+    color: #67b0d6;
+    /* color: #20afd7; */
+}
+
+.tabs {
+    width: 970px;
+    float: none;
+    list-style: none;
+    position: relative;
+    margin: 0;
+    text-align: left;
+    color: #eeeeee;
+    border-radius: 5px 5px 0 0;
+}
+li {
+    float: left;
+    display: block;
+}
+input[type="radio"] {
+    position: absolute;
+    top: 0;
+    left: -9999px;
+}
+label {
+    display: block;
+    padding: 14px 21px;
+    border-radius: 3px 3px 0 0;
+    font-size: 14px;
+    font-weight: normal;
+    text-transform: uppercase;
+
+    cursor: pointer;
+    position: relative;
+    top: 4px;
+    transition: all 0.2s ease-in-out;
+    color: #eeeeee;
+
+}
+
+.tabs:hover {
+     background: #223242;
+    color: #eeeeee;
+ }
+
+.tab-content{
+    z-index: 2;
+    display: none;
+    overflow: hidden;
+    width: 100%;
+    font-size: 15px;
+    line-height: 25px;
+    padding: 25px;
+    position: absolute;
+    top: 53px;
+    left: 0;
+     background: #161B22;
+    color: #eeeeee;
+    border-radius: 5px;
+    text-align: justify;
+}
+
+  [id^="tab"]:checked + label {
+      top: 0;
+      padding-top: 17px;
+      background: #161B22;
+      color: #eeeeee;
+  }
+[id^="tab"]:checked ~ [id^="tab-content"] {
+    display: block;
+}
+
+
+* {
+   /* -webkit-box-sizing: border-box; */
+    box-sizing: border-box;
+    font-size: 15px;
+    line-height:25px;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Roboto Mono', monospace;
+}
+
+input[type="file"]::-webkit-file-upload-button {
+    background-color: rgb(42, 184, 230);
+    color: #eeeeee;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    opacity: 0.9;
+    margin-bottom: 20px;
+}
+
+input[type=checkbox] {
+    margin-bottom: 20px; /* adjust the value as per your requirement */
+}
+
+
+.file-input {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    width: 200px;
+    height: 40px;
+    background: #161b22;
+    color: #ffffff;
+    text-align: center;
+    line-height: 40px;
+    font-size: 14px;
+}
+
+.file-input input[type="file"] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    opacity: 0;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.file-name {
+    margin-top: 10px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-group button {
+    margin-top: 1rem;
+    border-radius: 5px;
+}
+
+table td {
+    font-size:13px;
+}
+
+form {
+    background-color: #223242;
+    color: #ffffff;
+    padding: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+input[type="file"] {
+    margin-left:10px;
+    font-size:11px;
+}
+
+input[type="checkbox"] {
+    margin-left:10px;
+    font-size:11px;
+}
+
+input[type="text"],
+input[type="password"],
+textarea, select {
+    background-color: #0D1117;
+    color: #ffffff;
+    padding: 10px;
+    border:0;
+    margin: 10px;
+    font-size:13px;
+    width: 480px;
+    min-height:50px;
+}
+
+input[type="submit"],
+input[type="button"],
+button {
+    border-radius: 5px;
+    background-color: #fff;
+    color: #11689e;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-right: 10px;
+    opacity: 0.9;
+}
+
+input[type="submit"]:hover,
+input[type="button"]:hover,
+button:hover {
+    background-color: #bcd6e7;
+}
+
+input[type="submit"]:active,
+input[type="button"]:active,
+button:active {
+    background-color: #bcd6e7;
+}
+
+
+a {
+    text-decoration: none;
+}
+
+select {
+    margin-bottom: 20px;
+    color:#eeeeee;
+    border: 0;
+    outline: none;
+    padding: 0 8px;
+    /* add any other styles you want */
+    width: 478px;
+    height: 40px;
+    background-color: #0D1117;
+    font-size: 13px;
+
+}
+
+.fuelform {
+    width: 600px;
+    background-color: #223242;
+    -webkit-box-shadow: 0 0 9px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 9px 0 rgba(0, 0, 0, 0.3);
+    margin: 15px auto;
+    border-radius: 10px;
+    justify-content: flex-start;
+}
+
+.fuelform > :last-child {
+    bottom:-70px !important;
+    margin-left:-20px;
+}
+
+.login-fields {
+    min-height: 400px;
+    display: flex;
+    flex-wrap: wrap;
+    border-left: 2px solid #404d5a;
+    padding-left: 100px;
+    align-items: center;
+}
+
+.login-fields > div {
+}
+
+.login .links, .links {
+    font-family: 'Roboto Mono', monospace;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    padding: 0 15px;
+
+}
+
+.login .links a, .links a {
+    font-family: 'Roboto Mono', monospace;
+    color:  #112131; /*rgb(32, 164, 200); */
+    text-decoration: none;
+    /*display: -webkit-inline-box;*/
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    padding: 0 10px 10px 10px;
+    font-weight: bold;
+    border-radius: 10px;
+}
+
+.login .links a:hover, .links a:hover {
+
+    color: #FFFFFF; /* rgb(22, 154, 200);*/
+    box-shadow: 0 0 2px 0 rgba(42, 184, 230, 0.5);
+}
+
+.login .links a.active, .links a.active {
+    border-bottom: 3px solid #0D1117;
+    color: #dddddd;
+}
+
+.login form, form {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    padding-top: 30px;
+    border-radius: 10px;
+}
+
+.login form label, form label {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    width: 0;
+    height: 0;
+    background-color: #112131;
+    color: #334364;
+}
+
+.login form label { /* dont use, so dont need to show*/
+    display:none;
+}
+
+.login form input[type="password"], .login form input[type="text"], .login form input[type="email"] {
+    width: 100%;
+    height: 50px;
+    border:0;
+    margin:0 0 20px 0;
+    background:transparent;
+    border:2px solid #404d5a;
+    padding: 0 15px;
+    color: #fff;
+}
+
+.login ::placeholder {
+    color:#404d5a;
+}
+
+.login form input[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    background-color:  #1b4c68;
+    border: 0;
+    cursor: pointer;
+    font-weight: bold;
+    color: #fff;
+    font-size:13px;
+    font-weight:300;
+    letter-spacing:1px;
+}
+
+.login form input[type="submit"]:hover {
+    background-color:  #fff; 
+    color:#11689e;
+}
+
+.navtop {
+    height: 60px;
+    width: 100%;
+    border: 0;
+}
+
+.navtop div {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    margin: 0 auto;
+    width: 1000px;
+    height: 100%;
+}
+
+.navtop div a {
+    display:block;
+}
+
+.navtop div a {
+    padding: 5px 30px;
+    text-decoration: none;
+    color:#878990; /*#767879; /* #656768; */
+}
+
+.navtop div a span {
+    font-size:13px;
+}
+
+.navtop div a i {
+    padding: 2px 15px 0 0;
+    display:inline-block;
+    max-width:31px;
+}
+
+.navtop a:hover {
+
+    color: #20afd7; /*rgb(62, 204, 250);*/
+}
+
+body.loggedin {
+}
+
+
+body.not-loggedin {
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    height:90vh;
+}
+
+.content {
+    max-width: 1000px;
+    padding-left:30px;
+    padding-top:25px;
+}
+
+.content h2 {
+    margin: 0;
+    padding-bottom: 50px;
+    font-size: 28px;
+    font-weight:300;
+    color:#eee; /*#fff*/
+   /* color: #20afd7;*/
+
+}
+
+.content h2::after{
+    content:"";
+    margin-top:25px;
+    display:block;
+    position:absolute;
+    height:1px;
+    border-bottom: 2px solid #262628;
+    width:calc(100% - 240px);
+    left:240px;
+}
+
+
+.content h3 {
+    padding-top: 25px;
+    padding-bottom: 5px;
+    margin: 0 0 15px;
+    font-size: 14px;
+    color: #eee; /*#fff*/ /*#fe5413;xxx*/
+    letter-spacing:1px;
+}
+
+.content > p, .content > div {
+    color: #eeeeee;
+    margin: 15px 0;
+    padding: 30px;
+    border:0;
+    background-color: #323232;
+}
+/*
+.content > p, .content > div:hover {
+    -webkit-box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.1);
+    color: #eeeeee;
+    margin: 15px 0;
+    padding: 15px;
+    background-color: #323232;
+}*/
+
+.content > p table td, .content > div table td {
+    padding: 5px;
+}
+
+.content > p table td:first-child, .content > div table td:first-child {
+    font-weight: 300;
+    font-size: 11px;
+    padding-right: 15px;
+    opacity: 0.5;
+    letter-spacing: 1px;
+}
+
+.content > p table td a, .content > div table td a {
+    color: #dddddd;
+    -webkit-transition: color 0.3s;
+    transition: color 0.3s;
+    opacity: 1;
+    text-decoration: none;
+    margin: 0;
+    padding: 0;
+}
+
+
+.content > div p {
+    padding: 5px;
+    margin: 0 0 10px 0;
+}
+
+
+.content > p  a, .content > div a {
+    color: #fff;
+    -webkit-transition: color 0.3s;
+    transition: color 0.3s;
+    opacity: 1;
+    text-decoration: none;
+    margin: 5px;
+    padding: 5px;
+}
+/*
+.content > p  a:hover, .content > div a:hover {
+    color: #eeeeee; 
+
+    opacity: 0.9;
+    text-decoration: none;
+}*/
+
+.node-container {
+    display: flex;
+    flex-direction: column;
+    background-color: #F5F5F5;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #888888;
+}
+
+.node-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.node-header h2 {
+    margin: 0;
+}
+
+.node-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.node-content table {
+    margin-left: 20px;
+}
+
+.node-content table td {
+    padding: 5px;
+}
+
+.node-content table td:first-child {
+    font-weight: bold;
+}
+
+.node-content table td:last-child {
+    text-align: right;
+}
+
+.node-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.node-footer a {
+    color: #555555;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.node-footer a:hover {
+    text-decoration: underline;
+}
+
+div.metastore-container, div.metastore-container-disabled {
+    background:none;
+    margin-top:1px;
+    margin-bottom:1px;
+    padding:0;
+}
+
+.content .metastore-container > a, div.metastore-container-disabled > a {
+    margin:0;
+    padding:0;
+}
+
+.metastore-childnode {
+    background: #18394c;
+    margin-top:1px;
+    margin-bottom:1px;
+    padding:25px 15px;
+    border-radius:5px;
+}
+
+/* !!!!!!!!!!! */
+/* please use designators and no inline css */
+
+.metastore-container > a, .metastore-container > div > a, div.metastore-container-disabled > a, div.metastore-container-disabled > div > a { /* why are these lil a here? */
+    display:none
+}
+
+
+.metastore-container > div > div > a, div.metastore-container-disabled > div > div > a {
+    padding:0;
+    margin:0;
+}
+
+
+.metastore-container > div > div > a > div, div.metastore-container-disabled > div > div > a > div {
+    display:flex;
+    margin-top:6px;
+}
+
+.metastore-container > div > div > a > div > :last-child, .metastore-container > div > div > a > div > :first-child {
+    background:#2a536a;
+    padding:1px 12px;
+    font-size:10px;
+    border-radius:3px;
+}
+
+.metastore-container-disabled > div > div > a > div > :last-child, .metastore-container-disabled > div > div > a > div > :first-child {
+    background:#2a536a;
+    padding:1px 12px;
+    font-size:10px;
+    border-radius:3px;
+}
+
+.metastore-container > div > div > a:hover > div > :last-child, .metastore-container > div > div > a:hover > div > :first-child {
+    background:#3b6b86;
+}
+
+.metastore-container-disabled > div > div > a:hover > div > :last-child, .metastore-container-disabled > div > div > a:hover > div > :first-child {
+    background:#3b6b86;
+}
+
+
+.metastore-container > div > div > a > div > :first-child, .metastore-container-disabled > div > div > a > div > :first-child {
+    margin-right:7px;
+}
+
+.metastore-container > div > div > div, .metastore-container-disabled > div > div > div {
+    display:flex;
+}
+
+.metastore-container > div > div > div > i, .metastore-container-disabled > div > div > div > i {
+    display:none;
+}
+
+.metastore-container > div > div > div > a, .metastore-container-disabled > div > div > div > a {
+    padding:0;
+    margin:0;
+}
+
+.metastore-container > div > div > div > a button, .metastore-container-disabled > div > div > div > a button {
+    margin:0;
+    /*margin-left:10px;              modded here */
+    background:transparent;
+    color:#fff;
+    border:2px solid #3b6b86;
+}
+
+.metastore-container > div > div > div > a button:hover, .metastore-container-disabled > div > div > div > a button:hover {
+
+    background:#fff;
+    color:#11689e;
+    border:2px solid #fff;
+}
+
+.metastore-childnode:hover {
+    background: #1b4c68;
+}
+
+.metastore-childnode p {
+    color:#fff !important;
+    text-transform:uppercase;
+    letter-spacing:1px;
+}
+
+/* RELAYERING CSS */
+/* :FLAT */
+
+body {
+    background: #101217; /* #0d0e12;*/
+}
+
+body main {
+    display:flex;
+    justify-content:flex-start;
+}
+
+.navtop div {
+    display:flex;
+    width:inherit;
+    flex-direction:column;
+}
+
+/*
+.navtop div > :nth-child(1)::before {
+    content:"Main";
+    color:#767879; /* #656768;
+    font-size:10px;
+    letter-spacing:0.8px;
+    width:100%;
+    display:block;
+    text-transform:uppercase;
+    padding-bottom:10px;
+}
+*/
+
+.navtop div > :nth-child(1)::before {
+    content:"MetaForge CS";
+    color:#767879; /* #656768; */
+    font-size:10px;
+    letter-spacing:0.8px;
+    width:100%;
+    display:block;
+    text-transform:uppercase;
+    padding-bottom:10px;
+    padding-top:20px;
+}
+
+.navtop div > :nth-child(7)::before {
+    content:"Admin";
+    color:#767879; /* #656768; */
+    font-size:10px;
+    letter-spacing:0.8px;
+    width:100%;
+    display:block;
+    text-transform:uppercase;
+    padding-bottom:10px;
+    padding-top:20px;
+}
+
+
+.navtop {
+    height:inherit;
+    min-height:calc(100vh - 100px);
+    min-width:240px;
+    width:inherit;
+    border-right:2px solid #262628;
+    padding-top:20px;
+}
+
+.logo {
+    border-bottom:2px solid #262628;
+    min-height:100px;
+    display:flex;
+    align-items:center;
+}
+
+.login h1, h1 {
+    margin:10px 0 10px 20px;
+    border-right:2px solid #262628;
+    width:220px;
+    display:block;
+    position:relative;
+}
+
+/* Did this a bit dirty, but didnt want to add an element for this */
+.loggedin h1::after {
+    content: "product of FuelFoundry";
+    font-size: 10px;
+    position: absolute;
+    left: 250px;
+    top: 25px;
+    min-width: 300px;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    color:#767879; /* #656768; */
+}
+
+.logo img {
+    display:block;
+    min-height:60px;
+}
+
+table tr td:first-child {
+    min-width:200px;
+}
+
+.login form {
+    align-items:center;
+    flex-wrap:nowrap;
+    background:transparent
+}

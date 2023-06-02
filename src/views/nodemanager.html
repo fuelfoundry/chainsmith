@@ -1,0 +1,202 @@
+{% extends 'layout.html' %}
+
+{% block title %}ChainSmith - NodeForge{% endblock %}
+
+{% block content %}
+
+<h2>NODEFORGE</h2>
+
+{% if added %}
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    Node added successfully. &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+
+</div>
+{% else %}
+
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    Theta Metachain fabric infrastructure is engineered to operate across multiple devices. Our team of experts at FuelFoundry advocate for the deployment of subchains in odd-numbered configurations, such as a single node or clusters of three or five nodes, ensuring balanced governance and delivering optimal resource availability. For a more comprehensive understanding, please refer to our schematics provided. Our diagrams offer detailed visual aids that further clarify these recommendations.
+</div>
+
+{% endif %}
+
+<h3>NODES &mdash; ACTIVE &nbsp;<a style="color:rgb(42, 184, 230);" href="/nodemanager/add">+</a></h3>
+<div class="metastore-container"></div>
+
+<h3>NODES &mdash; PROVISIONED &nbsp;<a style="color:rgb(42, 184, 230);" href="/nodemanager/add">+</a></h3>
+<div class="metastore-container-disabled"></div>
+
+<script>
+
+    fetchNodes(document.querySelector('.metastore-container'), 'enabled');
+    fetchNodes(document.querySelector('.metastore-container-disabled'), 'disabled');
+
+    async function fetchNodes(container, state) {
+        try {
+
+            const response = await fetch('/nodemanager/nodes/' + state);
+            const profiles = await response.json();
+            const profilesWithAddress = await Promise.all(profiles.map(async (profile) => {
+
+                const res1 = await fetch('/keystore/id/' + profile.keystore_id);
+                const keyData1 = await res1.json();
+
+                return {
+
+                    ...profile,
+                    keystore_address: keyData1.keystore.address
+                };
+            }));
+
+            container.innerHTML = profilesWithAddress.map(({id, name, type, host, keystore_address, last_state, last_update, mainchain, username}) => `
+            <div class="metastore-childnode">
+              <div class="metadiv-relative">
+                <div class="meta-ident">
+                <p id="state${id}">
+          ${last_state === -1 ? 'NOT DEPLOYED' : ''}
+          ${last_state === 0 ? 'OFFLINE' : ''}
+          ${last_state > 0 && last_state < 5 ? 'INSTALLING' : ''}
+          ${last_state >= 5 && last_state < 9 ? 'SYNCING' : ''}
+          ${last_state === 10 ? 'CONFIGURATION COMPLETE' : ''}
+            </p><p>${id}</p></div>
+                <p style="color:#fe5413">${name}</p>
+          <table>
+            <tr>
+              <td>NETWORK</td>
+              <td>${mainchain}</td>
+            </tr>
+            <tr>
+              <td>TYPE</td>
+              <td>${type === 1 ? 'Walletnode' : 'Validator'}</td>
+            </tr>
+            <tr>
+              <td>HOST</td>
+              <td> <a class="meta-link" HREF="ssh://${username}@${host}">${host}</a></td>
+            </tr>
+            <tr>
+              <td>NODE ADDRESS</td>
+              <td><a class="meta-link" target="_blank" href="https://testnet-explorer.thetatoken.org/account/${keystore_address}">0x${keystore_address}</td>
+            </tr>
+            <tr>
+              <td>LAST UPDATE</td>
+              <td>${last_update} UTC</td>
+            </tr>
+          </table>
+          <div class="metabuttons-container">
+
+              ${last_state === 0 ? '<a href="/nodemanager/start/'+id+'" title="Start Node"> <button><i class="fas fa-play"></i></button> </a>' : ''}
+
+              ${last_state > 18 ? '<a href="/nodemanager/stop/'+id+'" title="Stop Node"> <button><i class="fas fa-stop"></i></button> </a>' : ''}
+
+              ${last_state === -1 || last_state === 2 ? `<a title="Deploy | Install Node on Remote Linux Host"><button id="deploy${id}" onclick="deployNode(`+id+`)"><i style="color:#2ee4be" class="fa-solid fa-rocket"></i></button></a>` : `<a title="Node Status"><button id="status${id}" onclick="nodeStatus(`+id+`)"><i class="fa-solid fa-arrows-rotate"></i></button></a>`}
+
+              <a href="/nodemanager/edit/${id}" title="Edit Node"> <button><i class="fas fa-edit"></i></button></a>
+
+          </div><i class="fa-solid fa-server"></i><div class="node-status" id="node-status${id}"></div>
+              </div>
+            </div>
+          <br/>
+    `).join('');
+        } catch (error) {
+//id="deploy${id}"
+            console.error(error);
+        }
+    }
+
+    function disableButton(id) {
+
+        const button = document.getElementById(`deploy${id}`);
+
+        if (button) {
+
+            button.disabled = true;
+            button.style.backgroundColor = "#333333";
+        }
+    }
+
+    async function deployNode(id) {
+
+        disableButton(id);
+
+        console.log('deploySubchain called');
+        showToast('Deploying Node ID# '+id+'...', '#2caed7');
+
+        fetch(`/nodemanager/deploy/${id}`)
+
+        let lastState = -1;
+
+        while (lastState < 10) {
+
+            console.log('status cycler init.')
+            await new Promise(r => setTimeout(r, 20000));
+
+            const response = await fetch(`/nodemanager/status/${id}`);
+            console.log('response:',response);
+
+            const { last_update, last_state, status } = await response.json();
+
+            if (last_state == 2) {
+
+                console.log('Error occured: SSH ACCESS FAILURE');
+                showToast('SSH connection error, aborting...', '#2caed7');
+                // an error has occured
+                break;
+            }
+
+            if (last_state !== lastState) {
+
+                lastState = last_state;
+                console.log(last_update, 'lastState:',lastState);
+                showToast(status, '#2caed7');
+            }
+
+            if (last_state < 0) {
+                lastState = last_state;
+                // an error has occured
+                break;
+            }
+        }
+
+        if (lastState === -1) {
+
+            console.log('Error occurred');
+            showToast("Error: Verify connection and try again", '#9faed7');
+        } else {
+
+            console.log('');
+            if (last_state != 2) {
+                showToast('Refreshing...', '#2caed7');
+            }
+        }
+
+        await new Promise(r => setTimeout(r, 2555));
+        location.reload();
+    }
+
+    async function nodeStatus(id) {
+        try {
+            console.log(`http://localhost:3000/nodemanager/status/${id}`);
+            const response = await fetch(`http://localhost:3000/nodemanager/status/${id}`);
+
+            if (!response.ok) {
+
+                throw new Error(`HTTP error! status: ${response.status}`);
+            } else {
+
+                const data = await response.json();
+                console.log(`status`+id, ` status${id}`)
+                const node_status = document.getElementById(`node-status${id}`);
+
+                node_status.textContent = data.last_update + ': ' + data.status;
+            }
+        } catch (error) {
+            const node_status = document.getElementById(`node-status${id}`);
+
+            console.error('There was an error with the API:', error);
+           // document.querySelector(`node-status${id}`).styles.color = 'red';
+            node_status.textContent = 'API Error';
+        }
+    }
+
+</script>
+{% endblock %}
+

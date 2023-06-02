@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+
+{% block title %}ChainSmith - TokenForge - Edit Governance Token{% endblock %}
+
+{% block content %}
+
+
+
+
+<h2>TOKENFORGE</h2>
+
+<div class="alert alert-success alert-dismissible fade show" role="alert" style="background: #161B22">
+    As a failsafe tokens may only be activated/deactivated (enabled/disabled).
+</div>
+
+<h3>EDIT GOVERNANCE TOKEN</h3>
+    <form action="/govtoken/edit/{{ id }}" method="post" style="position: relative;width:100%;vertical-align: top;" class="fuelform">
+        <div>
+        <table style="vertical-align: text-top;">
+            <tr>
+                <td>Token Name</td>
+                <td>{{ govtoken_name }}</td>
+            </tr>
+            <tr>
+                <td>&nbsp</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="checkbox" name="enable" {{ enableStr }}> Activate (Enable)
+
+                    <br/>
+                </td>
+            </tr>
+        </table>
+        </div>
+        <div style="float: right; position: absolute;bottom: -50px;"><button type="cancel">Cancel</button> <button type="submit">Save</button></div>
+    </form>
+<script>
+
+</script>
+{% endblock %}

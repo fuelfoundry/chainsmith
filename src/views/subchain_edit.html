@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+
+{% block title %}ChainSmith - ChainForge - Edit Subchain{% endblock %}
+
+{% block content %}
+
+<h2>CHAINFORGE</h2>
+
+<h3>EDIT SUBCHAIN</h3>
+
+    <form action="/subchain/edit/{{ id }}" method="post" style="position: relative;width:100%;vertical-align: top;" class="fuelform">
+        <div>
+        <table style="vertical-align: text-top;">
+            <tr>
+                <td>NAME</td>
+                <td><input type="text" name="subchain_name" placeholder="{{ subchain_name }}" value="{{ subchain_name }}" required></td>
+            </tr>
+
+            <tr>
+                <td></td>
+                <td><input type="checkbox" name="enable" {{ enableStr }}> Activate (Enable)
+
+                    <br/>
+                </td>
+            </tr>
+
+        </table>
+
+        </div>
+        <div style="float: right; position: absolute;bottom: -50px;"><button type="cancel">Cancel</button> <button type="submit">Save</button></div>
+    </form>
+
+<script>
+
+    const submitButton = document.querySelector('button[type=submit]');
+    const cancelButton = document.querySelector('button[type=cancel]');
+
+    cancelButton.addEventListener('click', () => { window.history.back() });
+
+</script>
+{% endblock %}
