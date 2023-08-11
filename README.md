@@ -19,7 +19,6 @@
                          (((((((((((       (((((((((((  
                          (((((((((((       (((((((((((  
                          (((((((((((       (((((((((((  
-
 ```
 For more information, visit https://fuelfoundry.io  
 
